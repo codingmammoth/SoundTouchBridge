@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Radio tower">
+  <rect x="14" y="28" width="36" height="24" rx="6" fill="#222"/>
+  <path d="M32 28 23 12M32 28l9-16M25 16h14" stroke="#222" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="40" r="6" fill="none" stroke="#f2f2f2" stroke-width="4"/>
+  <path d="M36 35h7M36 41h7M36 47h4" stroke="#f2f2f2" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 15c-4 4-6 9-6 15M46 15c4 4 6 9 6 15" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+</svg>

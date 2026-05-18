@@ -58,7 +58,7 @@ function compactXml(text) {
 }
 
 function decodeXml(value) {
-  return String(value ?? "")
+  return String(value == null ? "" : value)
     .replace(/&apos;/g, "'")
     .replace(/&quot;/g, '"')
     .replace(/&gt;/g, ">")
@@ -67,7 +67,7 @@ function decodeXml(value) {
 }
 
 function escapeXml(value) {
-  return String(value ?? "")
+  return String(value == null ? "" : value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

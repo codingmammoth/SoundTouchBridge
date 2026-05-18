@@ -1,0 +1,694 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 18px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #1f2328;
+        background: #fff;
+      }
+
+      * {
+        box-sizing: inherit;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 17px;
+      }
+
+      label {
+        display: block;
+        margin: 0 0 5px;
+        color: #3f4650;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      input,
+      select,
+      button {
+        min-height: 40px;
+        border: 1px solid #cfd4dc;
+        border-radius: 8px;
+        font: inherit;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 8px 10px;
+        background: #fff;
+        color: #1f2328;
+      }
+
+      button {
+        padding: 8px 12px;
+        border-color: #262626;
+        background: #262626;
+        color: #fff;
+        font-weight: 650;
+      }
+
+      button.secondary {
+        border-color: #cfd4dc;
+        background: #fff;
+        color: #1f2328;
+      }
+
+      button.danger {
+        border-color: #a73434;
+        background: #a73434;
+      }
+
+      button:disabled {
+        border-color: #ccd1d8;
+        background: #ccd1d8;
+        color: #fff;
+      }
+
+      .section {
+        margin-bottom: 18px;
+      }
+
+      .preset-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .preset-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 11px 12px;
+        border: 1px solid #d9dce1;
+        border-radius: 8px;
+        background: #f8f9fb;
+      }
+
+      .preset-title {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .preset-subtitle,
+      .status,
+      .station-meta {
+        display: block;
+        margin-top: 3px;
+        overflow: hidden;
+        color: #606872;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .actions button {
+        min-height: 34px;
+        padding: 6px 9px;
+        white-space: nowrap;
+      }
+
+      .empty {
+        padding: 14px 12px;
+        border: 1px dashed #cfd4dc;
+        border-radius: 8px;
+        color: #606872;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: stretch;
+        justify-content: center;
+        padding: 14px;
+        background: rgba(15, 18, 22, 0.46);
+        z-index: 10;
+      }
+
+      .modal.open {
+        display: flex;
+      }
+
+      .dialog {
+        display: flex;
+        flex-direction: column;
+        width: min(680px, 100%);
+        max-height: 100%;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+        overflow: hidden;
+      }
+
+      .dialog-header,
+      .dialog-footer {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e5e8ed;
+      }
+
+      .dialog-footer {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        border-top: 1px solid #e5e8ed;
+        border-bottom: 0;
+      }
+
+      .dialog-body {
+        padding: 16px;
+        overflow: auto;
+      }
+
+      .search-grid,
+      .manual-grid {
+        display: grid;
+        grid-template-columns: 1fr 90px 1fr auto;
+        gap: 8px;
+        align-items: end;
+      }
+
+      .manual-grid {
+        grid-template-columns: 1fr 2fr;
+        margin-top: 14px;
+      }
+
+      .results {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .station {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #d9dce1;
+        border-radius: 8px;
+        background: #fff;
+        color: #1f2328;
+        text-align: left;
+      }
+
+      .station strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+      }
+
+      .station-name {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .station-check {
+        display: inline-flex;
+        flex: 0 0 22px;
+        margin-right: 4px;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border: 1px solid #cfd4dc;
+        border-radius: 50%;
+        color: transparent;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .station-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .station.selected {
+        border-color: #111;
+        background: #f1f4f8;
+      }
+
+      .station.selected .station-check {
+        border-color: #166534;
+        background: #166534;
+        color: #fff;
+      }
+
+      .modal-help {
+        margin: 0 0 14px;
+        color: #606872;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      @media (max-width: 720px) {
+        .preset-row,
+        .search-grid,
+        .manual-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .actions,
+        .dialog-footer {
+          justify-content: stretch;
+        }
+
+        .actions button,
+        .dialog-footer button {
+          flex: 1;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          color: #f2f4f7;
+          background: #111317;
+        }
+
+        input,
+        select,
+        button.secondary,
+        .preset-row,
+        .station,
+        .dialog {
+          border-color: #343942;
+          background: #191d23;
+          color: #f2f4f7;
+        }
+
+        .station.selected {
+          border-color: #f2f4f7;
+          background: #252b34;
+        }
+
+        .station-check {
+          border-color: #4b5563;
+        }
+
+        .dialog-header,
+        .dialog-footer {
+          border-color: #343942;
+        }
+
+        label,
+        .preset-subtitle,
+        .status,
+        .station-meta,
+        .modal-help,
+        .empty {
+          color: #a4adba;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Radio presets</h1>
+
+    <div class="section">
+      <label for="device">Speaker</label>
+      <select id="device"></select>
+    </div>
+
+    <div class="section">
+      <div id="presets" class="preset-list"></div>
+    </div>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="dialog">
+        <div class="dialog-header">
+          <h2 id="modal-title">Assign radio</h2>
+          <span id="modal-status" class="status"></span>
+        </div>
+        <div class="dialog-body">
+          <p class="modal-help">Search for an existing radio station, or add a direct http:// stream URL at the bottom.</p>
+
+          <div class="search-grid">
+            <div>
+              <label for="query">Station</label>
+              <input id="query" type="search" autocomplete="off" placeholder="BBC, KEXP, FIP">
+            </div>
+            <div>
+              <label for="countrycode">Country</label>
+              <input id="countrycode" maxlength="2" autocapitalize="characters" placeholder="BE">
+            </div>
+            <div>
+              <label for="tag">Tag</label>
+              <input id="tag" autocomplete="off" placeholder="news, jazz, rock">
+            </div>
+            <button id="search">Search</button>
+          </div>
+
+          <div id="results" class="results">
+            <div class="empty">Search for a radio station.</div>
+          </div>
+
+          <div class="manual-grid">
+            <div>
+              <label for="manual-name">Name</label>
+              <input id="manual-name" autocomplete="off">
+            </div>
+            <div>
+              <label for="manual-url">Stream URL</label>
+              <input id="manual-url" autocomplete="off" placeholder="http://example.com/stream.mp3">
+            </div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button id="cancel" class="secondary">Cancel</button>
+          <button id="assign" disabled>Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      (function () {
+        var devices = [];
+        var activePreset = null;
+        var selectedStation = null;
+
+        var deviceSelect = document.getElementById("device");
+        var presetsEl = document.getElementById("presets");
+        var modalEl = document.getElementById("modal");
+        var modalTitleEl = document.getElementById("modal-title");
+        var modalStatusEl = document.getElementById("modal-status");
+        var searchButton = document.getElementById("search");
+        var assignButton = document.getElementById("assign");
+        var resultsEl = document.getElementById("results");
+        var manualNameEl = document.getElementById("manual-name");
+        var manualUrlEl = document.getElementById("manual-url");
+        var NAME_MAX_LENGTH = 34;
+
+        function api(method, path, body) {
+          return new Promise(function (resolve, reject) {
+            Homey.api(method, path, body || null, function (error, result) {
+              if (error) {
+                reject(error);
+                return;
+              }
+              resolve(result);
+            });
+          });
+        }
+
+        function escapeHtml(value) {
+          return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+
+        function truncateName(value) {
+          var text = String(value == null ? "" : value).trim();
+          if (text.length <= NAME_MAX_LENGTH) {
+            return text;
+          }
+          return text.slice(0, NAME_MAX_LENGTH - 3).trim() + "...";
+        }
+
+        function getSelectedDevice() {
+          for (var index = 0; index < devices.length; index += 1) {
+            if (devices[index].id === deviceSelect.value) {
+              return devices[index];
+            }
+          }
+          return null;
+        }
+
+        function getPreset(device, presetNumber) {
+          var presets = device && device.presets ? device.presets : [];
+          for (var index = 0; index < presets.length; index += 1) {
+            if (Number(presets[index].preset) === Number(presetNumber)) {
+              return presets[index];
+            }
+          }
+          return null;
+        }
+
+        function renderDevices() {
+          deviceSelect.innerHTML = "";
+          devices.forEach(function (device) {
+            var option = document.createElement("option");
+            option.value = device.id;
+            option.textContent = device.name;
+            deviceSelect.appendChild(option);
+          });
+
+          if (devices.length === 0) {
+            deviceSelect.innerHTML = '<option value="">No SoundTouch speakers paired</option>';
+          }
+          renderPresets();
+        }
+
+        function renderPresets() {
+          var device = getSelectedDevice();
+          var presets = device && device.presets ? device.presets : [];
+          presetsEl.innerHTML = "";
+
+          if (presets.length === 0) {
+            presetsEl.innerHTML = '<div class="empty">Pair a SoundTouch speaker first. Add a device, select SoundTouch Bridge, and add your speaker.</div>';
+            return;
+          }
+
+          presets.forEach(function (preset) {
+            var isAssigned = Boolean(preset.url);
+            var row = document.createElement("div");
+            var displayName = isAssigned ? truncateName(preset.name) : "Not assigned";
+            row.className = "preset-row";
+            row.title = isAssigned ? preset.name : "";
+            row.innerHTML = '<div>'
+              + '<span class="preset-title">Preset ' + escapeHtml(preset.preset) + ': '
+              + escapeHtml(displayName) + '</span>'
+              + '<span class="preset-subtitle">' + escapeHtml(isAssigned ? "Ready" : "Assign a radio station") + '</span>'
+              + '</div>';
+
+            var actions = document.createElement("div");
+            actions.className = "actions";
+
+            var primary = document.createElement("button");
+            primary.type = "button";
+            primary.textContent = isAssigned ? "Edit" : "Assign radio";
+            primary.addEventListener("click", function () {
+              openModal(preset.preset);
+            });
+            actions.appendChild(primary);
+
+            row.appendChild(actions);
+            presetsEl.appendChild(row);
+          });
+        }
+
+        function openModal(presetNumber, clearFields) {
+          var device = getSelectedDevice();
+          var preset = getPreset(device, presetNumber);
+          activePreset = presetNumber;
+          selectedStation = null;
+          modalTitleEl.textContent = (preset && preset.url ? "Edit preset " : "Assign preset ") + presetNumber;
+          modalStatusEl.textContent = "";
+          resultsEl.innerHTML = '<div class="empty">Search for a radio station.</div>';
+          document.getElementById("query").value = "";
+          document.getElementById("countrycode").value = "";
+          document.getElementById("tag").value = "";
+          manualNameEl.value = clearFields ? "" : (preset && preset.name ? preset.name : "");
+          manualUrlEl.value = clearFields ? "" : (preset && preset.url ? preset.url : "");
+          assignButton.disabled = !manualNameEl.value || !manualUrlEl.value;
+          modalEl.classList.add("open");
+          setTimeout(function () {
+            document.getElementById("query").focus();
+          }, 0);
+        }
+
+        function closeModal() {
+          modalEl.classList.remove("open");
+          activePreset = null;
+          selectedStation = null;
+        }
+
+        function setSelectedStation(station, button) {
+          var selected = resultsEl.querySelectorAll(".selected");
+          for (var index = 0; index < selected.length; index += 1) {
+            selected[index].classList.remove("selected");
+            selected[index].setAttribute("aria-pressed", "false");
+          }
+          button.classList.add("selected");
+          button.setAttribute("aria-pressed", "true");
+          selectedStation = station;
+          manualNameEl.value = truncateName(station.name || "");
+          manualUrlEl.value = station.streamUrl || "";
+          modalStatusEl.textContent = "Selected: " + (station.name || "radio station") + ". Review the fields below, then save.";
+          assignButton.disabled = false;
+        }
+
+        function renderResults(results) {
+          selectedStation = null;
+          resultsEl.innerHTML = "";
+
+          if (!results || results.length === 0) {
+            resultsEl.innerHTML = '<div class="empty">No compatible HTTP streams found.</div>';
+            return;
+          }
+
+          results.forEach(function (station) {
+            var button = document.createElement("button");
+            var details = [];
+            button.type = "button";
+            button.className = "station";
+            button.setAttribute("aria-pressed", "false");
+            button.title = station.name || "";
+            if (station.countrycode) details.push(station.countrycode);
+            if (station.codec) details.push(station.codec);
+            if (station.bitrate) details.push(station.bitrate + " kbps");
+            button.innerHTML = '<strong class="station-name">'
+              + '<span class="station-check" aria-hidden="true">✓</span>'
+              + '<span class="station-label">' + escapeHtml(truncateName(station.name)) + '</span>'
+              + '</strong>'
+              + '<span class="station-meta">' + escapeHtml(details.join(" | ")) + '</span>';
+            button.addEventListener("click", function () {
+              setSelectedStation(station, button);
+            });
+            resultsEl.appendChild(button);
+          });
+        }
+
+        function refreshDevices() {
+          return api("GET", "/preset-devices").then(function (response) {
+            devices = response || [];
+            renderDevices();
+          });
+        }
+
+        function updateDevicePresets(response) {
+          var device = getSelectedDevice();
+          if (device && response && response.presets) {
+            device.presets = response.presets;
+          }
+          renderPresets();
+        }
+
+        function searchStations() {
+          searchButton.disabled = true;
+          assignButton.disabled = true;
+          modalStatusEl.textContent = "Searching compatible streams...";
+          resultsEl.innerHTML = '<div class="empty">Searching...</div>';
+
+          api("POST", "/stations/search", {
+            query: document.getElementById("query").value,
+            countrycode: document.getElementById("countrycode").value,
+            tag: document.getElementById("tag").value,
+          }).then(function (response) {
+            renderResults(response.results);
+            modalStatusEl.textContent = response.results.length + " compatible stream(s) from " + response.source + ".";
+            assignButton.disabled = !manualNameEl.value || !manualUrlEl.value;
+          }).catch(function (error) {
+            renderResults([]);
+            modalStatusEl.textContent = "";
+            Homey.alert(error.message || String(error));
+          }).then(function () {
+            searchButton.disabled = false;
+          });
+        }
+
+        function assignPreset() {
+          var device = getSelectedDevice();
+          if (!device || !activePreset) {
+            return;
+          }
+
+          assignButton.disabled = true;
+          modalStatusEl.textContent = "Saving preset...";
+          api("PUT", "/presets", {
+            deviceId: device.id,
+            preset: activePreset,
+            name: manualNameEl.value,
+            streamUrl: manualUrlEl.value,
+          }).then(function (response) {
+            updateDevicePresets(response);
+            closeModal();
+          }).catch(function (error) {
+            Homey.alert(error.message || String(error));
+          }).then(function () {
+            assignButton.disabled = false;
+          });
+        }
+
+        function updateAssignState() {
+          if (selectedStation) {
+            var selected = resultsEl.querySelectorAll(".selected");
+            for (var index = 0; index < selected.length; index += 1) {
+              selected[index].classList.remove("selected");
+              selected[index].setAttribute("aria-pressed", "false");
+            }
+            selectedStation = null;
+            modalStatusEl.textContent = "Custom stream details. Review the fields below, then save.";
+          }
+          assignButton.disabled = !manualNameEl.value.trim() || !manualUrlEl.value.trim();
+        }
+
+        function onReady() {
+          searchButton.addEventListener("click", searchStations);
+          assignButton.addEventListener("click", assignPreset);
+          document.getElementById("cancel").addEventListener("click", closeModal);
+          deviceSelect.addEventListener("change", renderPresets);
+          manualNameEl.addEventListener("input", updateAssignState);
+          manualUrlEl.addEventListener("input", updateAssignState);
+          document.getElementById("query").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+              searchStations();
+            }
+          });
+          modalEl.addEventListener("click", function (event) {
+            if (event.target === modalEl) {
+              closeModal();
+            }
+          });
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && modalEl.classList.contains("open")) {
+              closeModal();
+            }
+          });
+
+          refreshDevices().then(function () {
+            Homey.ready();
+          }).catch(function (error) {
+            Homey.alert(error.message || String(error));
+            Homey.ready();
+          });
+        }
+
+        window.onHomeyReady = onReady;
+      }());
+    </script>
+  </body>
+</html>

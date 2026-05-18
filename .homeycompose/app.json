@@ -2,7 +2,6 @@
   "id": "com.codingmammoth.homeybose",
   "version": "0.1.0",
   "compatibility": ">=5.0.0",
-  "runtime": "nodejs",
   "platforms": ["local"],
   "sdk": 3,
   "brandColor": "#222222",
@@ -23,5 +22,23 @@
   },
   "author": {
     "name": "CodingMammoth"
+  },
+  "api": {
+    "getPresetDevices": {
+      "method": "GET",
+      "path": "/preset-devices"
+    },
+    "searchStations": {
+      "method": "POST",
+      "path": "/stations/search"
+    },
+    "savePreset": {
+      "method": "POST",
+      "path": "/presets"
+    },
+    "updatePreset": {
+      "method": "PUT",
+      "path": "/presets"
+    }
   }
 }

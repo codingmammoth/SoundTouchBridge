@@ -7,17 +7,16 @@
     "validate": "homey app validate",
     "run": "homey app run",
     "test:stream-protocol": "node scripts/test-stream-protocol.js",
-    "test": "node --check app.js && node --check drivers/soundtouch/driver.js && node --check drivers/soundtouch/device.js && node --check lib/soundtouch-client.js"
+    "test": "node --check app.js && node --check api.js && node --check drivers/soundtouch/driver.js && node --check drivers/soundtouch/device.js && node --check lib/soundtouch-client.js && node --check lib/radio-browser-client.js && node --check scripts/test-stream-protocol.js"
   },
   "dependencies": {
-    "homey": "^3.10.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "homey": "^3.10.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=12"
   },
   "private": true,
   "license": "MIT"

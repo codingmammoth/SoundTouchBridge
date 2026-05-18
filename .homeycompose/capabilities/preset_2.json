@@ -3,7 +3,7 @@
     "en": "Preset 2"
   },
   "type": "boolean",
-  "getable": false,
+  "getable": true,
   "setable": true,
   "uiComponent": "button",
   "icon": "/assets/icons/preset-2.svg"

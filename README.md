@@ -102,7 +102,7 @@ Default preset slots are seeded with direct plain-HTTP streams:
 2. BBC World Service
 3. Radio Paradise
 4. FIP
-5. Radio SRF 3
+5. Dance UK
 6. KEXP
 
 ## Developer Test Flow
@@ -132,6 +132,17 @@ Run on a Homey Pro in developer mode:
 npx homey app run
 ```
 
+Install on a Homey Pro without keeping the debugger attached:
+
+```bash
+npx homey app install
+```
+
+The manifest intentionally omits an explicit `runtime: "nodejs"` field so older
+Homey Pro firmware can treat the app as a regular SDK v3 JavaScript app. Some
+older local Homey runtimes reject newer runtime declarations with
+`incompatible_app_runtime_nodejs`.
+
 Then:
 
 1. Open the Homey app.
@@ -141,9 +152,16 @@ Then:
 5. Press physical preset buttons on the speaker.
 6. Enable debug logging and check "Last WebSocket event" only when
    troubleshooting event payloads.
-7. Configure stream URLs for preset slots 1 through 6 in device settings.
+7. Open the SoundTouch Bridge app settings to assign, edit, reassign, or remove
+   radio stations for each preset slot. Speaker settings show a read-only preset
+   overview for the selected device.
 8. Create a Flow action for the paired speaker: "Play stream" or
    "Play configured preset".
+
+Radio station search uses the public Radio Browser API. No API key is needed.
+The app filters search results to currently working, non-HLS MP3/AAC stations
+and saves only direct plain-HTTP stream URLs that pass a quick compatibility
+probe. Manual URL settings remain available for advanced use.
 
 The first development goal is to capture the exact WebSocket payload emitted by
 the speaker when each physical preset button is pressed.

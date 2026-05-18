@@ -61,8 +61,8 @@ const DEFAULT_PRESETS = [
     url: "http://icecast.radiofrance.fr/fip-midfi.mp3",
   },
   {
-    name: "Radio SRF 3",
-    url: "http://stream.srg-ssr.ch/srgssr/srf3/mp3/128",
+    name: "Dance UK",
+    url: "http://dancestream.danceradiouk.com/stream/1/stream.mp3",
   },
   {
     name: "KEXP",
@@ -87,7 +87,9 @@ class SoundTouchDevice extends Homey.Device {
     await this.ensureCapabilities();
     await this.ensureDefaultPresetSettings();
     await this.ensurePublishReadySettings();
+    await this.syncPresetSettingsUi();
     await this.syncPresetButtonTitles();
+    await this.syncPresetCapabilitySelection();
     this.registerCapabilityListeners();
     await this.syncStatus();
     this.connectWebSocket();
@@ -99,8 +101,6 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings, changedKeys }) {
-    this.validatePresetUrlSettings(newSettings, changedKeys);
-
     if (changedKeys.includes("ip_address")) {
       const nextAddress = String(newSettings.ip_address || "").trim();
       if (!nextAddress) {
@@ -109,11 +109,6 @@ class SoundTouchDevice extends Homey.Device {
       this.address = nextAddress;
       this.closeWebSocket();
       this.connectWebSocket();
-    }
-
-    if (changedKeys.some((key) => /^preset[1-6]_name$/.test(key))) {
-      await this.syncPresetButtonTitles(newSettings);
-      await this.syncActivePresetSetting(newSettings);
     }
   }
 
@@ -241,6 +236,26 @@ class SoundTouchDevice extends Homey.Device {
     await this.setStoreValue("publish_ready_settings_applied", true);
   }
 
+  async syncPresetSettingsUi(settings = this.getSettings()) {
+    const updates = {};
+    for (let preset = 1; preset <= 6; preset += 1) {
+      const name = String(settings[`preset${preset}_name`] || "").trim();
+      const url = String(settings[`preset${preset}_url`] || "").trim();
+      const summary = name || (url ? `Preset ${preset}` : "Not assigned");
+
+      if (settings[`preset${preset}_summary`] !== summary) {
+        updates[`preset${preset}_summary`] = summary;
+      }
+      if (settings[`preset${preset}_action`] && settings[`preset${preset}_action`] !== "keep") {
+        updates[`preset${preset}_action`] = "keep";
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await this.setSettings(updates);
+    }
+  }
+
   getStoredActivePreset() {
     const activePreset = Number(this.getStore().active_preset);
     return Number.isInteger(activePreset) && activePreset >= 1 && activePreset <= 6
@@ -250,8 +265,7 @@ class SoundTouchDevice extends Homey.Device {
 
   getPresetButtonTitle(preset, settings = this.getSettings(), activePreset = this.activePreset) {
     const configuredName = String(settings[`preset${preset}_name`] || "").trim();
-    const baseTitle = configuredName || `Preset ${preset}`;
-    const title = preset === activePreset ? `Playing: ${baseTitle}` : baseTitle;
+    const title = configuredName || `Preset ${preset}`;
 
     if (title.length <= PRESET_NAME_MAX_LENGTH) {
       return title;
@@ -307,6 +321,7 @@ class SoundTouchDevice extends Homey.Device {
     const nextPreset = Number.isInteger(preset) && preset >= 1 && preset <= 6 ? preset : null;
     if (this.activePreset === nextPreset) {
       await this.syncActivePresetSetting(settings);
+      await this.syncPresetCapabilitySelection();
       return;
     }
 
@@ -316,6 +331,7 @@ class SoundTouchDevice extends Homey.Device {
     }
     await this.syncActivePresetSetting(settings);
     await this.syncPresetButtonTitles(settings);
+    await this.syncPresetCapabilitySelection();
   }
 
   async syncActivePresetSetting(settings = this.getSettings()) {
@@ -366,6 +382,12 @@ class SoundTouchDevice extends Homey.Device {
   async setCapabilityValueIfAvailable(capability, value) {
     if (this.hasCapability(capability)) {
       await this.setCapabilityValue(capability, value);
+    }
+  }
+
+  async syncPresetCapabilitySelection() {
+    for (let preset = 1; preset <= 6; preset += 1) {
+      await this.setCapabilityValueIfAvailable(`preset_${preset}`, preset === this.activePreset);
     }
   }
 
@@ -554,7 +576,7 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async playConfiguredPreset(preset) {
-    const presetNumber = Number(preset?.id ?? preset);
+    const presetNumber = Number(preset && preset.id != null ? preset.id : preset);
     if (!Number.isInteger(presetNumber) || presetNumber < 1 || presetNumber > 6) {
       throw new Error(`Preset ${preset} is not valid.`);
     }

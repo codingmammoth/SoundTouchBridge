@@ -3,7 +3,6 @@
   "id": "com.codingmammoth.homeybose",
   "version": "0.1.0",
   "compatibility": ">=5.0.0",
-  "runtime": "nodejs",
   "platforms": [
     "local"
   ],
@@ -32,6 +31,24 @@
   },
   "author": {
     "name": "CodingMammoth"
+  },
+  "api": {
+    "getPresetDevices": {
+      "method": "GET",
+      "path": "/preset-devices"
+    },
+    "searchStations": {
+      "method": "POST",
+      "path": "/stations/search"
+    },
+    "savePreset": {
+      "method": "POST",
+      "path": "/presets"
+    },
+    "updatePreset": {
+      "method": "PUT",
+      "path": "/presets"
+    }
   },
   "flow": {
     "triggers": [
@@ -239,174 +256,64 @@
         {
           "type": "group",
           "label": {
-            "en": "Preset 1"
+            "en": "Radio presets"
           },
           "children": [
             {
-              "id": "preset1_name",
-              "type": "text",
+              "id": "preset_management_hint",
+              "type": "label",
               "label": {
-                "en": "Name"
+                "en": "Manage presets"
               },
-              "value": "One World Radio",
-              "highlight": true
+              "value": "Check the SoundTouch Bridge app settings to assign or edit radio presets."
             },
             {
-              "id": "preset1_url",
-              "type": "text",
+              "id": "preset1_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 1"
               },
-              "value": "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 1 is detected or the Flow action is run."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Preset 2"
-          },
-          "children": [
-            {
-              "id": "preset2_name",
-              "type": "text",
-              "label": {
-                "en": "Name"
-              },
-              "value": "BBC World Service",
-              "highlight": true
+              "value": "One World Radio"
             },
             {
-              "id": "preset2_url",
-              "type": "text",
+              "id": "preset2_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 2"
               },
-              "value": "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 2 is detected or the Flow action is run."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Preset 3"
-          },
-          "children": [
-            {
-              "id": "preset3_name",
-              "type": "text",
-              "label": {
-                "en": "Name"
-              },
-              "value": "Radio Paradise",
-              "highlight": true
+              "value": "BBC World Service"
             },
             {
-              "id": "preset3_url",
-              "type": "text",
+              "id": "preset3_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 3"
               },
-              "value": "http://stream-tx3.radioparadise.com/mp3-192",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 3 is detected or the Flow action is run."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Preset 4"
-          },
-          "children": [
-            {
-              "id": "preset4_name",
-              "type": "text",
-              "label": {
-                "en": "Name"
-              },
-              "value": "FIP",
-              "highlight": true
+              "value": "Radio Paradise"
             },
             {
-              "id": "preset4_url",
-              "type": "text",
+              "id": "preset4_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 4"
               },
-              "value": "http://icecast.radiofrance.fr/fip-midfi.mp3",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 4 is detected or the Flow action is run."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Preset 5"
-          },
-          "children": [
-            {
-              "id": "preset5_name",
-              "type": "text",
-              "label": {
-                "en": "Name"
-              },
-              "value": "Radio SRF 3",
-              "highlight": true
+              "value": "FIP"
             },
             {
-              "id": "preset5_url",
-              "type": "text",
+              "id": "preset5_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 5"
               },
-              "value": "http://stream.srg-ssr.ch/srgssr/srf3/mp3/128",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 5 is detected or the Flow action is run."
-              }
-            }
-          ]
-        },
-        {
-          "type": "group",
-          "label": {
-            "en": "Preset 6"
-          },
-          "children": [
-            {
-              "id": "preset6_name",
-              "type": "text",
-              "label": {
-                "en": "Name"
-              },
-              "value": "KEXP",
-              "highlight": true
+              "value": "Dance UK"
             },
             {
-              "id": "preset6_url",
-              "type": "text",
+              "id": "preset6_summary",
+              "type": "label",
               "label": {
-                "en": "Stream URL"
+                "en": "Preset 6"
               },
-              "value": "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
-              "highlight": true,
-              "hint": {
-                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 6 is detected or the Flow action is run."
-              }
+              "value": "KEXP"
             }
           ]
         },
@@ -482,7 +389,7 @@
         "en": "Preset 1"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-1.svg"
@@ -492,7 +399,7 @@
         "en": "Preset 2"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-2.svg"
@@ -502,7 +409,7 @@
         "en": "Preset 3"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-3.svg"
@@ -512,7 +419,7 @@
         "en": "Preset 4"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-4.svg"
@@ -522,7 +429,7 @@
         "en": "Preset 5"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-5.svg"
@@ -532,7 +439,7 @@
         "en": "Preset 6"
       },
       "type": "boolean",
-      "getable": false,
+      "getable": true,
       "setable": true,
       "uiComponent": "button",
       "icon": "/assets/icons/preset-6.svg"
