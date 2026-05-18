@@ -4,18 +4,22 @@ const http = require("http");
 
 const SOUNDTOUCH_PORT = 8090;
 const UPNP_PORT = 8091;
+const OWR_STREAM_PATH = "25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3";
 const DEFAULT_TESTS = [
   {
-    label: "HTTP MP3",
-    url: "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
+    label: "OWR direct MP3 over HTTP",
+    url: `http://${OWR_STREAM_PATH}`,
+    comparison: "OWR direct MP3 protocol comparison",
   },
   {
-    label: "HTTPS MP3",
-    url: "https://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
+    label: "OWR direct MP3 over HTTPS",
+    url: `https://${OWR_STREAM_PATH}`,
+    comparison: "OWR direct MP3 protocol comparison",
   },
   {
-    label: "HTTPS HLS",
+    label: "Separate HTTPS HLS probe",
     url: "https://radio.vrtcdn.be/vrt/stubru/live.m3u8",
+    comparison: "HLS playlist probe, not part of the OWR HTTP/HTTPS comparison",
   },
 ];
 
@@ -25,6 +29,7 @@ function usage() {
     "  node scripts/test-stream-protocol.js --host <speaker-ip> [--yes]",
     "  node scripts/test-stream-protocol.js --host <speaker-ip> --url <stream-url> [--label <name>] [--yes]",
     "",
+    "Default tests compare the same OWR MP3 stream over HTTP and HTTPS, then try a separate HTTPS HLS probe.",
     "This test changes playback on the selected SoundTouch speaker.",
     "Use --yes to confirm intentionally starting playback.",
   ].join("\n"));
@@ -175,6 +180,9 @@ async function playStreamRaw(host, streamUrl) {
 
 async function runTest(host, test) {
   console.log(`\n== ${test.label} ==`);
+  if (test.comparison) {
+    console.log(test.comparison);
+  }
   console.log(test.url);
   await playStreamRaw(host, test.url);
   await wait(3000);

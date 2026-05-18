@@ -92,7 +92,9 @@ npm run test:stream-protocol -- --host 192.168.2.129 --yes
 ```
 
 This starts playback on the speaker and compares an HTTP MP3, an HTTPS MP3, and
-an HTTPS HLS URL through the same UPnP path used by the app.
+an HTTPS HLS URL through the same UPnP path used by the app. The HTTP/HTTPS MP3
+comparison uses the same One World Radio stream host and path:
+`25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3`.
 
 Default preset slots are seeded with direct plain-HTTP streams:
 
