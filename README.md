@@ -146,6 +146,7 @@ The current app prototype:
   metadata in device settings
 - triggers a Homey Flow card when a preset event is detected
 - maps physical preset 1 through 6 to configured stream URLs
+- updates dashboard preset button titles from the configured preset names
 - provides a Flow action to play a configured preset slot
 - provides a Flow action to play any stream URL through UPnP
 - exposes Homey device controls:

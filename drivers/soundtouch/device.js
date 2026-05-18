@@ -68,6 +68,7 @@ const DEFAULT_PRESETS = [
     url: "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
   },
 ];
+const PRESET_NAME_MAX_LENGTH = 24;
 
 class SoundTouchDevice extends Homey.Device {
   async onInit() {
@@ -79,6 +80,7 @@ class SoundTouchDevice extends Homey.Device {
     await this.refreshAddressFromSettings();
     await this.ensureCapabilities();
     await this.ensureDefaultPresetSettings();
+    await this.syncPresetButtonTitles();
     this.registerCapabilityListeners();
     await this.syncStatus();
     this.connectWebSocket();
@@ -98,6 +100,10 @@ class SoundTouchDevice extends Homey.Device {
       this.address = nextAddress;
       this.closeWebSocket();
       this.connectWebSocket();
+    }
+
+    if (changedKeys.some((key) => /^preset[1-6]_name$/.test(key))) {
+      await this.syncPresetButtonTitles(newSettings);
     }
   }
 
@@ -188,6 +194,53 @@ class SoundTouchDevice extends Homey.Device {
       await this.setSettings(updates);
     }
     await this.setStoreValue("default_presets_seeded", true);
+  }
+
+  getPresetButtonTitle(preset, settings = this.getSettings()) {
+    const configuredName = String(settings[`preset${preset}_name`] || "").trim();
+    if (!configuredName) {
+      return `Preset ${preset}`;
+    }
+
+    if (configuredName.length <= PRESET_NAME_MAX_LENGTH) {
+      return configuredName;
+    }
+
+    return `${configuredName.slice(0, PRESET_NAME_MAX_LENGTH - 3).trim()}...`;
+  }
+
+  async syncPresetButtonTitles(settings = this.getSettings()) {
+    if (typeof this.setCapabilityOptions !== "function") {
+      this.log("Preset button title sync is not supported by this Homey runtime.");
+      return;
+    }
+
+    const store = this.getStore();
+    const nextTitles = {};
+    for (let preset = 1; preset <= 6; preset += 1) {
+      nextTitles[`preset_${preset}`] = this.getPresetButtonTitle(preset, settings);
+    }
+
+    if (store.preset_button_titles === JSON.stringify(nextTitles)) {
+      return;
+    }
+
+    try {
+      for (const [capability, title] of Object.entries(nextTitles)) {
+        await this.setCapabilityOptions(capability, {
+          title: {
+            en: title,
+          },
+        });
+      }
+    } catch (error) {
+      this.log(`Could not sync preset button titles: ${error.message}`);
+      return;
+    }
+
+    if (typeof this.setStoreValue === "function") {
+      await this.setStoreValue("preset_button_titles", JSON.stringify(nextTitles));
+    }
   }
 
   registerCapabilityListeners() {
