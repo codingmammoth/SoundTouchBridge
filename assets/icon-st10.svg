@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch 10 Bridge">
+  <path fill="#ffffff" fill-rule="evenodd" d="M286 82h388c42 0 76 34 76 76v644c0 42-34 76-76 76H286c-42 0-76-34-76-76V158c0-42 34-76 76-76Zm0 48c-16 0-28 12-28 28v644c0 16 12 28 28 28h388c16 0 28-12 28-28V158c0-16-12-28-28-28H286Z"/>
+  <path fill="#ffffff" d="M238 314h484v48H238z"/>
+  <path fill="#ffffff" opacity="0.9" d="M238 386h484v24H238z"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M352 176h256c22 0 40 18 40 40v14c0 22-18 40-40 40H352c-22 0-40-18-40-40v-14c0-22 18-40 40-40Zm0 34c-4 0-6 2-6 6v14c0 4 2 6 6 6h256c4 0 6-2 6-6v-14c0-4-2-6-6-6H352Z"/>
+  <circle cx="390" cy="223" r="16" fill="#ffffff"/>
+  <circle cx="480" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <circle cx="570" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <g fill="#ffffff" opacity="0.74">
+    <circle cx="328" cy="494" r="12"/>
+    <circle cx="404" cy="494" r="12"/>
+    <circle cx="480" cy="494" r="12"/>
+    <circle cx="556" cy="494" r="12"/>
+    <circle cx="632" cy="494" r="12"/>
+    <circle cx="328" cy="570" r="12"/>
+    <circle cx="404" cy="570" r="12"/>
+    <circle cx="480" cy="570" r="12"/>
+    <circle cx="556" cy="570" r="12"/>
+    <circle cx="632" cy="570" r="12"/>
+    <circle cx="328" cy="646" r="12"/>
+    <circle cx="404" cy="646" r="12"/>
+    <circle cx="480" cy="646" r="12"/>
+    <circle cx="556" cy="646" r="12"/>
+    <circle cx="632" cy="646" r="12"/>
+    <circle cx="328" cy="722" r="12"/>
+    <circle cx="404" cy="722" r="12"/>
+    <circle cx="480" cy="722" r="12"/>
+    <circle cx="556" cy="722" r="12"/>
+    <circle cx="632" cy="722" r="12"/>
+  </g>
+</svg>

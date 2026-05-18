@@ -1,34 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
   <defs>
     <filter id="speakerShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.28"/>
+      <feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#000000" flood-opacity="0.28"/>
     </filter>
+    <linearGradient id="body" x1="132" y1="280" x2="828" y2="686" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#343434"/>
+      <stop offset="0.55" stop-color="#232323"/>
+      <stop offset="1" stop-color="#111111"/>
+    </linearGradient>
+    <linearGradient id="top" x1="210" y1="218" x2="754" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#161616"/>
+      <stop offset="0.26" stop-color="#d7d7d7"/>
+      <stop offset="0.74" stop-color="#ececec"/>
+      <stop offset="1" stop-color="#c8c8c8"/>
+    </linearGradient>
+    <linearGradient id="display" x1="428" y1="312" x2="532" y2="570" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3b3b3b"/>
+      <stop offset="1" stop-color="#090909"/>
+    </linearGradient>
     <clipPath id="speakerBody">
-      <rect x="260" y="120" width="440" height="720" rx="44"/>
+      <rect x="110" y="280" width="740" height="394" rx="44"/>
     </clipPath>
-    <pattern id="grille" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
-      <rect width="18" height="18" fill="#171717"/>
-      <circle cx="9" cy="9" r="1.7" fill="#424242"/>
+    <pattern id="grille" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="#1b1b1b"/>
+      <circle cx="6" cy="6" r="1.25" fill="#444444"/>
     </pattern>
   </defs>
 
   <g filter="url(#speakerShadow)">
+    <path d="M138 246c26-28 57-42 94-42h496c37 0 68 14 94 42l28 58H110z" fill="url(#top)"/>
+    <rect x="366" y="220" width="228" height="60" rx="8" fill="#222222"/>
+    <rect x="390" y="236" width="58" height="28" rx="6" fill="#343434"/>
+    <rect x="454" y="236" width="88" height="28" rx="6" fill="#303030"/>
+    <rect x="548" y="236" width="34" height="28" rx="6" fill="#343434"/>
+
     <g clip-path="url(#speakerBody)">
-      <rect x="260" y="120" width="440" height="720" fill="#303030"/>
-      <rect x="260" y="120" width="440" height="215" fill="#242424"/>
-
-      <rect x="343" y="205" width="274" height="42" rx="21" fill="#151515"/>
-      <circle cx="396" cy="226" r="6.5" fill="#f4f4f4"/>
-      <circle cx="454" cy="226" r="6.5" fill="#5d5d5d"/>
-      <circle cx="512" cy="226" r="6.5" fill="#5d5d5d"/>
-      <circle cx="570" cy="226" r="6.5" fill="#5d5d5d"/>
-
-      <rect x="260" y="335" width="440" height="13" fill="#d1d1d1"/>
-      <circle cx="575" cy="341.5" r="10" fill="#f4f4f4"/>
-
-      <rect x="286" y="386" width="388" height="422" rx="10" fill="url(#grille)"/>
+      <rect x="110" y="280" width="740" height="394" fill="url(#body)"/>
+      <rect x="110" y="300" width="740" height="374" fill="url(#grille)" opacity="0.92"/>
+      <rect x="408" y="312" width="144" height="290" rx="18" fill="url(#display)" stroke="#8b8b8b" stroke-width="4"/>
+      <circle cx="480" cy="410" r="10" fill="#e8e8e8" opacity="0.82"/>
+      <path d="M462 374c10-9 26-9 36 0M470 384c6-5 14-5 20 0" fill="none" stroke="#d8d8d8" stroke-width="5" stroke-linecap="round" opacity="0.72"/>
+      <path d="M436 532h88" stroke="#f2f2f2" stroke-width="9" stroke-linecap="round"/>
+      <path d="M408 574h144v28H408z" fill="#d9d9d9"/>
     </g>
-    <rect x="260" y="120" width="440" height="720" rx="44" fill="none" stroke="#cfcfcf" stroke-width="7"/>
-    <path d="M273 143c0-6 5-11 11-11h392c6 0 11 5 11 11v34H273z" fill="#3a3a3a" opacity="0.62"/>
+    <rect x="110" y="280" width="740" height="394" rx="44" fill="none" stroke="#0f0f0f" stroke-width="10"/>
   </g>
 </svg>
