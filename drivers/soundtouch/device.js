@@ -14,6 +14,7 @@ const {
   setVolume,
   standby,
   stopPlayback,
+  validateStreamUrl,
 } = require("../../lib/soundtouch-client");
 
 const WEBSOCKET_PORT = 8080;
@@ -98,6 +99,8 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings, changedKeys }) {
+    this.validatePresetUrlSettings(newSettings, changedKeys);
+
     if (changedKeys.includes("ip_address")) {
       const nextAddress = String(newSettings.ip_address || "").trim();
       if (!nextAddress) {
@@ -112,6 +115,24 @@ class SoundTouchDevice extends Homey.Device {
       await this.syncPresetButtonTitles(newSettings);
       await this.syncActivePresetSetting(newSettings);
     }
+  }
+
+  validatePresetUrlSettings(settings, changedKeys) {
+    changedKeys
+      .filter((key) => /^preset[1-6]_url$/.test(key))
+      .forEach((key) => {
+        const url = String(settings[key] || "").trim();
+        if (!url) {
+          return;
+        }
+
+        try {
+          validateStreamUrl(url);
+        } catch (error) {
+          const preset = key.match(/^preset([1-6])_url$/)[1];
+          throw new Error(`Preset ${preset}: ${error.message}`);
+        }
+      });
   }
 
   async refreshAddressFromSettings() {

@@ -260,7 +260,7 @@
               "value": "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 1 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 1 is detected or the Flow action is run."
               }
             }
           ]
@@ -289,7 +289,7 @@
               "value": "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 2 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 2 is detected or the Flow action is run."
               }
             }
           ]
@@ -318,7 +318,7 @@
               "value": "http://stream-tx3.radioparadise.com/mp3-192",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 3 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 3 is detected or the Flow action is run."
               }
             }
           ]
@@ -347,7 +347,7 @@
               "value": "http://icecast.radiofrance.fr/fip-midfi.mp3",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 4 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 4 is detected or the Flow action is run."
               }
             }
           ]
@@ -376,7 +376,7 @@
               "value": "http://stream.srg-ssr.ch/srgssr/srf3/mp3/128",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 5 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 5 is detected or the Flow action is run."
               }
             }
           ]
@@ -405,7 +405,7 @@
               "value": "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
               "highlight": true,
               "hint": {
-                "en": "Used when physical preset 6 is detected or the Flow action is run."
+                "en": "Use a direct http:// MP3 or AAC stream. HTTPS, web player, and playlist URLs are not supported reliably by SoundTouch playback. Used when physical preset 6 is detected or the Flow action is run."
               }
             }
           ]

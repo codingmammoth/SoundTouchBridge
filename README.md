@@ -68,6 +68,7 @@ Version 0.1 should support:
 - automatic discovery during pairing
 - manual IP fallback
 - six configured preset URLs per speaker
+- direct `http://` stream URL validation for presets and Flow playback
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
 - Homey device controls for power, stop, volume, and preset buttons
@@ -78,6 +79,11 @@ Version 0.1 should support:
 The current implementation already exposes six preset slots in device settings.
 The remaining validation step is to capture the exact WebSocket payload emitted
 by each physical preset button on real speakers.
+
+Preset URLs should be direct `http://` MP3 or AAC streams. HTTPS, web player,
+and playlist URLs are not supported reliably by older SoundTouch playback, so
+the app rejects non-HTTP stream URLs when saving preset settings or running the
+generic stream Flow action.
 
 Default preset slots are seeded with direct plain-HTTP streams:
 
