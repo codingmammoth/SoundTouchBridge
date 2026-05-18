@@ -6,7 +6,12 @@ const {
   compactXml,
   extractPresetNumber,
   getNowPlaying,
+  getVolume,
   playStream,
+  selectLastSource,
+  setVolume,
+  standby,
+  stopPlayback,
 } = require("../../lib/soundtouch-client");
 
 const WEBSOCKET_PORT = 8080;
@@ -22,6 +27,8 @@ class SoundTouchDevice extends Homey.Device {
     this.log("SoundTouch device initialized");
 
     await this.refreshAddressFromSettings();
+    this.registerCapabilityListeners();
+    await this.syncStatus();
     this.connectWebSocket();
   }
 
@@ -53,6 +60,49 @@ class SoundTouchDevice extends Homey.Device {
     }
 
     await this.setAvailable();
+  }
+
+  registerCapabilityListeners() {
+    this.registerCapabilityListener("onoff", async (value) => {
+      if (value) {
+        await this.turnOn();
+      } else {
+        await this.turnOff();
+      }
+    });
+
+    this.registerCapabilityListener("volume_set", async (value) => {
+      await this.setSpeakerVolume(value);
+    });
+
+    this.registerCapabilityListener("button.stop", async () => {
+      await this.stop();
+    });
+
+    for (let preset = 1; preset <= 6; preset += 1) {
+      this.registerCapabilityListener(`button.preset_${preset}`, async () => {
+        await this.playConfiguredPreset(preset);
+      });
+    }
+  }
+
+  async syncStatus() {
+    if (!this.address) {
+      return;
+    }
+
+    try {
+      const [nowPlaying, volume] = await Promise.all([
+        getNowPlaying(this.address),
+        getVolume(this.address),
+      ]);
+      await this.setCapabilityValue("onoff", !nowPlaying.includes('source="STANDBY"'));
+      if (volume !== null) {
+        await this.setCapabilityValue("volume_set", volume / 100);
+      }
+    } catch (error) {
+      this.log(`Could not sync speaker status: ${error.message}`);
+    }
   }
 
   connectWebSocket() {
@@ -167,6 +217,44 @@ class SoundTouchDevice extends Homey.Device {
     await this.playStream(url);
   }
 
+  async turnOn() {
+    if (!this.address) {
+      throw new Error("No speaker IP address configured.");
+    }
+
+    this.log(`Turning on ${this.address}`);
+    await selectLastSource(this.address);
+    await this.setCapabilityValue("onoff", true);
+  }
+
+  async turnOff() {
+    if (!this.address) {
+      throw new Error("No speaker IP address configured.");
+    }
+
+    this.log(`Putting ${this.address} in standby`);
+    await standby(this.address);
+    await this.setCapabilityValue("onoff", false);
+  }
+
+  async stop() {
+    if (!this.address) {
+      throw new Error("No speaker IP address configured.");
+    }
+
+    this.log(`Stopping playback on ${this.address}`);
+    await stopPlayback(this.address);
+  }
+
+  async setSpeakerVolume(value) {
+    if (!this.address) {
+      throw new Error("No speaker IP address configured.");
+    }
+
+    await setVolume(this.address, value);
+    await this.setCapabilityValue("volume_set", value);
+  }
+
   async playStream(url, { volume } = {}) {
     if (!this.address) {
       throw new Error("No speaker IP address configured.");
@@ -174,6 +262,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Playing stream on ${this.address}: ${url}`);
     await playStream(this.address, url, { volume });
+    await this.setCapabilityValue("onoff", true);
 
     const nowPlaying = await getNowPlaying(this.address);
     this.log(`Now playing: ${compactXml(nowPlaying)}`);

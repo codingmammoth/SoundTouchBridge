@@ -8,7 +8,54 @@
     "xlarge": "/drivers/soundtouch/assets/images/xlarge.png"
   },
   "class": "speaker",
-  "capabilities": [],
+  "capabilities": [
+    "onoff",
+    "volume_set",
+    "button.stop",
+    "button.preset_1",
+    "button.preset_2",
+    "button.preset_3",
+    "button.preset_4",
+    "button.preset_5",
+    "button.preset_6"
+  ],
+  "capabilitiesOptions": {
+    "button.stop": {
+      "title": {
+        "en": "Stop"
+      }
+    },
+    "button.preset_1": {
+      "title": {
+        "en": "Preset 1"
+      }
+    },
+    "button.preset_2": {
+      "title": {
+        "en": "Preset 2"
+      }
+    },
+    "button.preset_3": {
+      "title": {
+        "en": "Preset 3"
+      }
+    },
+    "button.preset_4": {
+      "title": {
+        "en": "Preset 4"
+      }
+    },
+    "button.preset_5": {
+      "title": {
+        "en": "Preset 5"
+      }
+    },
+    "button.preset_6": {
+      "title": {
+        "en": "Preset 6"
+      }
+    }
+  },
   "platforms": ["local"],
   "connectivity": ["lan"],
   "discovery": "soundtouch-mdns",

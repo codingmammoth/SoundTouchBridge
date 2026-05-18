@@ -70,6 +70,7 @@ Version 0.1 should support:
 - six configured preset URLs per speaker
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
+- Homey device controls for power, stop, volume, and preset buttons
 - reconnect logic for WebSocket disconnects
 - clear unavailable state when the speaker or UPnP service is unreachable
 
@@ -134,6 +135,11 @@ The current app prototype:
 - maps physical preset 1 through 6 to configured stream URLs
 - provides a Flow action to play a configured preset slot
 - provides a Flow action to play any stream URL through UPnP
+- exposes Homey device controls:
+  - on/off toggle
+  - volume slider
+  - stop button
+  - preset 1 through 6 buttons
 
 The preset parser is intentionally broad until we capture real events from more
 speakers. It looks for common forms such as `PRESET_1`, `preset1`, and
