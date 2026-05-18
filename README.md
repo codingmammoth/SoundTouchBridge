@@ -80,6 +80,15 @@ The current implementation already exposes six preset slots in device settings.
 The remaining validation step is to capture the exact WebSocket payload emitted
 by each physical preset button on real speakers.
 
+Default preset slots are seeded with direct plain-HTTP streams:
+
+1. One World Radio
+2. BBC World Service
+3. Radio Paradise
+4. FIP
+5. Radio SRF 3
+6. KEXP
+
 ## Developer Test Flow
 
 Install dependencies:

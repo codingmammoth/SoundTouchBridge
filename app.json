@@ -349,7 +349,7 @@
               "label": {
                 "en": "Name"
               },
-              "value": "",
+              "value": "BBC World Service",
               "highlight": true
             },
             {
@@ -358,7 +358,7 @@
               "label": {
                 "en": "Stream URL"
               },
-              "value": "",
+              "value": "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
               "highlight": true,
               "hint": {
                 "en": "Used when physical preset 2 is detected or the Flow action is run."
@@ -378,7 +378,7 @@
               "label": {
                 "en": "Name"
               },
-              "value": "",
+              "value": "Radio Paradise",
               "highlight": true
             },
             {
@@ -387,7 +387,7 @@
               "label": {
                 "en": "Stream URL"
               },
-              "value": "",
+              "value": "http://stream-tx3.radioparadise.com/mp3-192",
               "highlight": true,
               "hint": {
                 "en": "Used when physical preset 3 is detected or the Flow action is run."
@@ -407,7 +407,7 @@
               "label": {
                 "en": "Name"
               },
-              "value": "",
+              "value": "FIP",
               "highlight": true
             },
             {
@@ -416,7 +416,7 @@
               "label": {
                 "en": "Stream URL"
               },
-              "value": "",
+              "value": "http://icecast.radiofrance.fr/fip-midfi.mp3",
               "highlight": true,
               "hint": {
                 "en": "Used when physical preset 4 is detected or the Flow action is run."
@@ -436,7 +436,7 @@
               "label": {
                 "en": "Name"
               },
-              "value": "",
+              "value": "Radio SRF 3",
               "highlight": true
             },
             {
@@ -445,7 +445,7 @@
               "label": {
                 "en": "Stream URL"
               },
-              "value": "",
+              "value": "http://stream.srg-ssr.ch/srgssr/srf3/mp3/128",
               "highlight": true,
               "hint": {
                 "en": "Used when physical preset 5 is detected or the Flow action is run."
@@ -465,7 +465,7 @@
               "label": {
                 "en": "Name"
               },
-              "value": "",
+              "value": "KEXP",
               "highlight": true
             },
             {
@@ -474,7 +474,7 @@
               "label": {
                 "en": "Stream URL"
               },
-              "value": "",
+              "value": "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
               "highlight": true,
               "hint": {
                 "en": "Used when physical preset 6 is detected or the Flow action is run."

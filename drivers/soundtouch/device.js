@@ -42,6 +42,32 @@ const DEPRECATED_CAPABILITIES = [
   "button.stop",
   "speaker_stop",
 ];
+const DEFAULT_PRESETS = [
+  {
+    name: "One World Radio",
+    url: "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
+  },
+  {
+    name: "BBC World Service",
+    url: "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+  },
+  {
+    name: "Radio Paradise",
+    url: "http://stream-tx3.radioparadise.com/mp3-192",
+  },
+  {
+    name: "FIP",
+    url: "http://icecast.radiofrance.fr/fip-midfi.mp3",
+  },
+  {
+    name: "Radio SRF 3",
+    url: "http://stream.srg-ssr.ch/srgssr/srf3/mp3/128",
+  },
+  {
+    name: "KEXP",
+    url: "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
+  },
+];
 
 class SoundTouchDevice extends Homey.Device {
   async onInit() {
@@ -52,6 +78,7 @@ class SoundTouchDevice extends Homey.Device {
 
     await this.refreshAddressFromSettings();
     await this.ensureCapabilities();
+    await this.ensureDefaultPresetSettings();
     this.registerCapabilityListeners();
     await this.syncStatus();
     this.connectWebSocket();
@@ -135,6 +162,32 @@ class SoundTouchDevice extends Homey.Device {
       this.log(`Adding missing capability ${capability}`);
       await this.addCapability(capability);
     }
+  }
+
+  async ensureDefaultPresetSettings() {
+    const store = this.getStore();
+    if (store.default_presets_seeded || typeof this.setStoreValue !== "function") {
+      return;
+    }
+
+    const settings = this.getSettings();
+    const updates = {};
+    DEFAULT_PRESETS.forEach(({ name, url }, index) => {
+      const preset = index + 1;
+      const nameKey = `preset${preset}_name`;
+      const urlKey = `preset${preset}_url`;
+      if (!String(settings[nameKey] || "").trim()) {
+        updates[nameKey] = name;
+      }
+      if (!String(settings[urlKey] || "").trim()) {
+        updates[urlKey] = url;
+      }
+    });
+
+    if (Object.keys(updates).length > 0) {
+      await this.setSettings(updates);
+    }
+    await this.setStoreValue("default_presets_seeded", true);
   }
 
   registerCapabilityListeners() {
