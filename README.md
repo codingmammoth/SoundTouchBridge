@@ -85,6 +85,15 @@ and playlist URLs are not supported reliably by older SoundTouch playback, so
 the app rejects non-HTTP stream URLs when saving preset settings or running the
 generic stream Flow action.
 
+To verify protocol support on a real speaker, run:
+
+```bash
+npm run test:stream-protocol -- --host 192.168.2.129 --yes
+```
+
+This starts playback on the speaker and compares an HTTP MP3, an HTTPS MP3, and
+an HTTPS HLS URL through the same UPnP path used by the app.
+
 Default preset slots are seeded with direct plain-HTTP streams:
 
 1. One World Radio

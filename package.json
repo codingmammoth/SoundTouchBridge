@@ -6,6 +6,7 @@
   "scripts": {
     "validate": "homey app validate",
     "run": "homey app run",
+    "test:stream-protocol": "node scripts/test-stream-protocol.js",
     "test": "node --check app.js && node --check drivers/soundtouch/driver.js && node --check drivers/soundtouch/device.js && node --check lib/soundtouch-client.js"
   },
   "dependencies": {
