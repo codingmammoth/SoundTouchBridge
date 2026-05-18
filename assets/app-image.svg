@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-label="SoundTouch Bridge app image">
+  <defs>
+    <linearGradient id="background" x1="120" y1="40" x2="900" y2="690" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7f8fb"/>
+      <stop offset="0.42" stop-color="#d9dde5"/>
+      <stop offset="1" stop-color="#8d95a3"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(660 205) rotate(128) scale(620 430)">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.76"/>
+      <stop offset="0.42" stop-color="#f4f7fb" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#eef1f6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1000" height="700" fill="url(#background)"/>
+  <rect width="1000" height="700" fill="url(#glow)"/>
+  <path d="M0 515c145-60 285-77 420-51 151 30 280 103 580 53v183H0z" fill="#ffffff" opacity="0.2"/>
+  <path d="M0 585c196-42 374-35 533 20 123 42 273 45 467 0v95H0z" fill="#242a33" opacity="0.1"/>
+</svg>

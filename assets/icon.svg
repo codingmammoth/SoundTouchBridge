@@ -1,34 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
-  <defs>
-    <filter id="speakerShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.28"/>
-    </filter>
-    <clipPath id="speakerBody">
-      <rect x="260" y="120" width="440" height="720" rx="44"/>
-    </clipPath>
-    <pattern id="grille" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
-      <rect width="18" height="18" fill="#171717"/>
-      <circle cx="9" cy="9" r="1.7" fill="#424242"/>
-    </pattern>
-  </defs>
-
-  <g filter="url(#speakerShadow)">
-    <g clip-path="url(#speakerBody)">
-      <rect x="260" y="120" width="440" height="720" fill="#303030"/>
-      <rect x="260" y="120" width="440" height="215" fill="#242424"/>
-
-      <rect x="343" y="205" width="274" height="42" rx="21" fill="#151515"/>
-      <circle cx="396" cy="226" r="6.5" fill="#f4f4f4"/>
-      <circle cx="454" cy="226" r="6.5" fill="#5d5d5d"/>
-      <circle cx="512" cy="226" r="6.5" fill="#5d5d5d"/>
-      <circle cx="570" cy="226" r="6.5" fill="#5d5d5d"/>
-
-      <rect x="260" y="335" width="440" height="13" fill="#d1d1d1"/>
-      <circle cx="575" cy="341.5" r="10" fill="#f4f4f4"/>
-
-      <rect x="286" y="386" width="388" height="422" rx="10" fill="url(#grille)"/>
-    </g>
-    <rect x="260" y="120" width="440" height="720" rx="44" fill="none" stroke="#cfcfcf" stroke-width="7"/>
-    <path d="M273 143c0-6 5-11 11-11h392c6 0 11 5 11 11v34H273z" fill="#3a3a3a" opacity="0.62"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M286 82h388c42 0 76 34 76 76v644c0 42-34 76-76 76H286c-42 0-76-34-76-76V158c0-42 34-76 76-76Zm0 48c-16 0-28 12-28 28v644c0 16 12 28 28 28h388c16 0 28-12 28-28V158c0-16-12-28-28-28H286Z"/>
+  <path fill="#ffffff" d="M238 314h484v48H238z"/>
+  <path fill="#ffffff" opacity="0.9" d="M238 386h484v24H238z"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M352 176h256c22 0 40 18 40 40v14c0 22-18 40-40 40H352c-22 0-40-18-40-40v-14c0-22 18-40 40-40Zm0 34c-4 0-6 2-6 6v14c0 4 2 6 6 6h256c4 0 6-2 6-6v-14c0-4-2-6-6-6H352Z"/>
+  <circle cx="390" cy="223" r="16" fill="#ffffff"/>
+  <circle cx="480" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <circle cx="570" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <g fill="#ffffff" opacity="0.74">
+    <circle cx="328" cy="494" r="12"/>
+    <circle cx="404" cy="494" r="12"/>
+    <circle cx="480" cy="494" r="12"/>
+    <circle cx="556" cy="494" r="12"/>
+    <circle cx="632" cy="494" r="12"/>
+    <circle cx="328" cy="570" r="12"/>
+    <circle cx="404" cy="570" r="12"/>
+    <circle cx="480" cy="570" r="12"/>
+    <circle cx="556" cy="570" r="12"/>
+    <circle cx="632" cy="570" r="12"/>
+    <circle cx="328" cy="646" r="12"/>
+    <circle cx="404" cy="646" r="12"/>
+    <circle cx="480" cy="646" r="12"/>
+    <circle cx="556" cy="646" r="12"/>
+    <circle cx="632" cy="646" r="12"/>
+    <circle cx="328" cy="722" r="12"/>
+    <circle cx="404" cy="722" r="12"/>
+    <circle cx="480" cy="722" r="12"/>
+    <circle cx="556" cy="722" r="12"/>
+    <circle cx="632" cy="722" r="12"/>
   </g>
 </svg>
