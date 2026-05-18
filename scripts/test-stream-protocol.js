@@ -57,6 +57,15 @@ function compactXml(text) {
   return String(text || "").replace(/\s+/g, " ").trim();
 }
 
+function decodeXml(value) {
+  return String(value ?? "")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&gt;/g, ">")
+    .replace(/&lt;/g, "<")
+    .replace(/&amp;/g, "&");
+}
+
 function escapeXml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -64,6 +73,18 @@ function escapeXml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function extractAttribute(xml, tagName, attributeName) {
+  const pattern = new RegExp(`<${tagName}\\b[^>]*\\s${attributeName}="([^"]*)"`, "i");
+  const match = String(xml).match(pattern);
+  return match ? decodeXml(match[1]) : null;
+}
+
+function extractTagValue(xml, tagName) {
+  const pattern = new RegExp(`<${tagName}\\b[^>]*>([^<]*)<\\/${tagName}>`, "i");
+  const match = String(xml).match(pattern);
+  return match ? decodeXml(match[1]).trim() : null;
 }
 
 function request({
@@ -187,6 +208,18 @@ async function runTest(host, test) {
   await playStreamRaw(host, test.url);
   await wait(3000);
   const nowPlaying = await requestSoundTouch(host, "/now_playing");
+  const location = extractAttribute(nowPlaying, "ContentItem", "location");
+  const playStatus = extractTagValue(nowPlaying, "playStatus");
+  console.log(`Requested: ${test.url}`);
+  console.log(`Reported:  ${location || "none"}`);
+  console.log(`Status:    ${playStatus || "unknown"}`);
+  if (location !== test.url) {
+    throw new Error("Speaker did not switch to the requested URI.");
+  }
+  if (playStatus !== "PLAY_STATE") {
+    throw new Error(`Speaker reported ${playStatus || "no play status"}.`);
+  }
+  console.log("RESULT: PASS");
   console.log(compactXml(nowPlaying));
 }
 
