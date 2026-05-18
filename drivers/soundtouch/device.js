@@ -18,16 +18,16 @@ const WEBSOCKET_PORT = 8080;
 const WEBSOCKET_PROTOCOL = "gabbo";
 const RECONNECT_DELAY_MS = 10000;
 const PRESET_DEBOUNCE_MS = 1500;
-const REQUIRED_CAPABILITIES = [
-  "onoff",
-  "volume_set",
-  "button.stop",
+const ORDERED_CAPABILITIES = [
   "button.preset_1",
   "button.preset_2",
   "button.preset_3",
   "button.preset_4",
   "button.preset_5",
   "button.preset_6",
+  "button.stop",
+  "onoff",
+  "volume_set",
 ];
 
 class SoundTouchDevice extends Homey.Device {
@@ -75,11 +75,42 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async ensureCapabilities() {
-    for (const capability of REQUIRED_CAPABILITIES) {
-      if (!this.hasCapability(capability)) {
-        this.log(`Adding missing capability ${capability}`);
-        await this.addCapability(capability);
+    if (this.shouldReorderCapabilities()) {
+      await this.reorderCapabilities();
+      return;
+    }
+
+    for (const capability of ORDERED_CAPABILITIES) {
+      await this.addCapabilityIfMissing(capability);
+    }
+  }
+
+  shouldReorderCapabilities() {
+    const currentCapabilities = this.getCapabilities();
+    const managedCapabilities = currentCapabilities.filter((capability) => (
+      ORDERED_CAPABILITIES.includes(capability)
+    ));
+    return managedCapabilities.join("|") !== ORDERED_CAPABILITIES.join("|");
+  }
+
+  async reorderCapabilities() {
+    this.log("Reordering dashboard controls");
+
+    for (const capability of ORDERED_CAPABILITIES) {
+      if (this.hasCapability(capability)) {
+        await this.removeCapability(capability);
       }
+    }
+
+    for (const capability of ORDERED_CAPABILITIES) {
+      await this.addCapabilityIfMissing(capability);
+    }
+  }
+
+  async addCapabilityIfMissing(capability) {
+    if (!this.hasCapability(capability)) {
+      this.log(`Adding missing capability ${capability}`);
+      await this.addCapability(capability);
     }
   }
 
@@ -291,8 +322,12 @@ class SoundTouchDevice extends Homey.Device {
     await playStream(this.address, url, { volume });
     await this.setCapabilityValueIfAvailable("onoff", true);
 
-    const nowPlaying = await getNowPlaying(this.address);
-    this.log(`Now playing: ${compactXml(nowPlaying)}`);
+    try {
+      const nowPlaying = await getNowPlaying(this.address);
+      this.log(`Now playing: ${compactXml(nowPlaying)}`);
+    } catch (error) {
+      this.log(`Could not verify now playing after starting stream: ${error.message}`);
+    }
     await this.setAvailable();
   }
 }

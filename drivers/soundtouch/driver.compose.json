@@ -9,15 +9,15 @@
   },
   "class": "speaker",
   "capabilities": [
-    "onoff",
-    "volume_set",
-    "button.stop",
     "button.preset_1",
     "button.preset_2",
     "button.preset_3",
     "button.preset_4",
     "button.preset_5",
-    "button.preset_6"
+    "button.preset_6",
+    "button.stop",
+    "onoff",
+    "volume_set"
   ],
   "capabilitiesOptions": {
     "button.stop": {
