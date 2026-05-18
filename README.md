@@ -71,8 +71,7 @@ Version 0.1 should support:
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
 - Homey device controls for power, stop, volume, and preset buttons
-- useful speaker metadata in device settings: connection state, Wi-Fi signal,
-  current source, now playing, and last raw WebSocket event
+- useful speaker metadata in device settings: active preset and compact status
 - reconnect logic for WebSocket disconnects
 - clear unavailable state when the speaker or UPnP service is unreachable
 
@@ -123,7 +122,8 @@ Then:
 3. Select a discovered SoundTouch speaker.
 4. Keep the Homey CLI logs open.
 5. Press physical preset buttons on the speaker.
-6. Check the logs and the device setting "Last WebSocket event".
+6. Enable debug logging and check "Last WebSocket event" only when
+   troubleshooting event payloads.
 7. Configure stream URLs for preset slots 1 through 6 in device settings.
 8. Create a Flow action for the paired speaker: "Play stream" or
    "Play configured preset".
@@ -140,13 +140,12 @@ The current app prototype:
 - verifies each discovered IP with `/info` on port `8090`
 - pairs the selected speaker as a Homey device
 - connects to `ws://<speaker-ip>:8080` using subprotocol `gabbo`
-- logs raw WebSocket events while debug logging is enabled
-- stores the latest raw WebSocket event in device settings
-- stores connection state, Wi-Fi signal, current source, and now playing
-  metadata in device settings
+- logs and stores raw WebSocket events only while debug logging is enabled
+- stores active preset and compact connection/source metadata in device settings
 - triggers a Homey Flow card when a preset event is detected
 - maps physical preset 1 through 6 to configured stream URLs
-- updates dashboard preset button titles from the configured preset names
+- updates dashboard preset button titles from the configured preset names and
+  marks the active preset as playing
 - provides a Flow action to play a configured preset slot
 - provides a Flow action to play any stream URL through UPnP
 - exposes Homey device controls:
@@ -154,7 +153,6 @@ The current app prototype:
   - stop button with a stop icon
   - on/off toggle
   - volume slider
-  - connectivity alarm
 
 The preset parser is intentionally broad until we capture real events from more
 speakers. It looks for common forms such as `PRESET_1`, `preset1`, and

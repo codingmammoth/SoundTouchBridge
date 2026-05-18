@@ -17,8 +17,7 @@
     "preset_6",
     "stop_playback",
     "onoff",
-    "volume_set",
-    "connectivity_alarm"
+    "volume_set"
   ],
   "capabilitiesOptions": {
     "stop_playback": {

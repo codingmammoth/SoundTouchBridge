@@ -2,77 +2,6 @@
   {
     "type": "group",
     "label": {
-      "en": "Connection"
-    },
-    "children": [
-      {
-        "id": "ip_address",
-        "type": "text",
-        "label": {
-          "en": "IP address"
-        },
-        "value": "",
-        "highlight": true,
-        "hint": {
-          "en": "Usually filled by discovery. You can edit it if the speaker changes address."
-        }
-      },
-      {
-        "id": "debug_enabled",
-        "type": "checkbox",
-        "label": {
-          "en": "Debug logging"
-        },
-        "value": true,
-        "hint": {
-          "en": "Log raw Bose WebSocket events while we identify preset payloads."
-        }
-      },
-      {
-        "id": "connection_state",
-        "type": "label",
-        "label": {
-          "en": "Connection state"
-        },
-        "value": "Unknown"
-      },
-      {
-        "id": "wifi_signal",
-        "type": "label",
-        "label": {
-          "en": "Wi-Fi signal"
-        },
-        "value": "Unknown"
-      },
-      {
-        "id": "current_source",
-        "type": "label",
-        "label": {
-          "en": "Current source"
-        },
-        "value": "Unknown"
-      },
-      {
-        "id": "now_playing_summary",
-        "type": "label",
-        "label": {
-          "en": "Now playing"
-        },
-        "value": "Unknown"
-      },
-      {
-        "id": "last_event",
-        "type": "label",
-        "label": {
-          "en": "Last WebSocket event"
-        },
-        "value": "None yet"
-      }
-    ]
-  },
-  {
-    "type": "group",
-    "label": {
       "en": "Preset 1"
     },
     "children": [
@@ -241,6 +170,69 @@
         "hint": {
           "en": "Used when physical preset 6 is detected or the Flow action is run."
         }
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Connection"
+    },
+    "children": [
+      {
+        "id": "ip_address",
+        "type": "text",
+        "label": {
+          "en": "IP address"
+        },
+        "value": "",
+        "highlight": true,
+        "hint": {
+          "en": "Usually filled by discovery. You can edit it if the speaker changes address."
+        }
+      },
+      {
+        "id": "active_preset",
+        "type": "label",
+        "label": {
+          "en": "Active preset"
+        },
+        "value": "None"
+      },
+      {
+        "id": "speaker_status",
+        "type": "label",
+        "label": {
+          "en": "Status"
+        },
+        "value": "Unknown"
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Diagnostics"
+    },
+    "children": [
+      {
+        "id": "debug_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Debug logging"
+        },
+        "value": false,
+        "hint": {
+          "en": "Log raw Bose WebSocket events while troubleshooting preset payloads."
+        }
+      },
+      {
+        "id": "last_event",
+        "type": "label",
+        "label": {
+          "en": "Last WebSocket event"
+        },
+        "value": "Enable debug logging to capture raw events."
       }
     ]
   }

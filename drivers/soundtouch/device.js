@@ -30,7 +30,6 @@ const ORDERED_CAPABILITIES = [
   "stop_playback",
   "onoff",
   "volume_set",
-  "connectivity_alarm",
 ];
 const DEPRECATED_CAPABILITIES = [
   "button.preset_1",
@@ -41,6 +40,7 @@ const DEPRECATED_CAPABILITIES = [
   "button.preset_6",
   "button.stop",
   "speaker_stop",
+  "connectivity_alarm",
 ];
 const DEFAULT_PRESETS = [
   {
@@ -75,11 +75,17 @@ class SoundTouchDevice extends Homey.Device {
     this.ws = null;
     this.reconnectTimer = null;
     this.lastPresetAt = new Map();
+    this.activePreset = this.getStoredActivePreset();
+    this.connectionState = null;
+    this.wifiSignal = null;
+    this.currentSource = null;
+    this.nowPlaying = null;
     this.log("SoundTouch device initialized");
 
     await this.refreshAddressFromSettings();
     await this.ensureCapabilities();
     await this.ensureDefaultPresetSettings();
+    await this.ensurePublishReadySettings();
     await this.syncPresetButtonTitles();
     this.registerCapabilityListeners();
     await this.syncStatus();
@@ -104,6 +110,7 @@ class SoundTouchDevice extends Homey.Device {
 
     if (changedKeys.some((key) => /^preset[1-6]_name$/.test(key))) {
       await this.syncPresetButtonTitles(newSettings);
+      await this.syncActivePresetSetting(newSettings);
     }
   }
 
@@ -196,17 +203,40 @@ class SoundTouchDevice extends Homey.Device {
     await this.setStoreValue("default_presets_seeded", true);
   }
 
-  getPresetButtonTitle(preset, settings = this.getSettings()) {
+  async ensurePublishReadySettings() {
+    const store = this.getStore();
+    if (store.publish_ready_settings_applied || typeof this.setStoreValue !== "function") {
+      return;
+    }
+
+    const settings = this.getSettings();
+    const updates = {
+      last_event: "Enable debug logging to capture raw events.",
+    };
+    if (settings.debug_enabled === true) {
+      updates.debug_enabled = false;
+    }
+    await this.setSettings(updates);
+    await this.setStoreValue("publish_ready_settings_applied", true);
+  }
+
+  getStoredActivePreset() {
+    const activePreset = Number(this.getStore().active_preset);
+    return Number.isInteger(activePreset) && activePreset >= 1 && activePreset <= 6
+      ? activePreset
+      : null;
+  }
+
+  getPresetButtonTitle(preset, settings = this.getSettings(), activePreset = this.activePreset) {
     const configuredName = String(settings[`preset${preset}_name`] || "").trim();
-    if (!configuredName) {
-      return `Preset ${preset}`;
+    const baseTitle = configuredName || `Preset ${preset}`;
+    const title = preset === activePreset ? `Playing: ${baseTitle}` : baseTitle;
+
+    if (title.length <= PRESET_NAME_MAX_LENGTH) {
+      return title;
     }
 
-    if (configuredName.length <= PRESET_NAME_MAX_LENGTH) {
-      return configuredName;
-    }
-
-    return `${configuredName.slice(0, PRESET_NAME_MAX_LENGTH - 3).trim()}...`;
+    return `${title.slice(0, PRESET_NAME_MAX_LENGTH - 3).trim()}...`;
   }
 
   async syncPresetButtonTitles(settings = this.getSettings()) {
@@ -218,7 +248,7 @@ class SoundTouchDevice extends Homey.Device {
     const store = this.getStore();
     const nextTitles = {};
     for (let preset = 1; preset <= 6; preset += 1) {
-      nextTitles[`preset_${preset}`] = this.getPresetButtonTitle(preset, settings);
+      nextTitles[`preset_${preset}`] = this.getPresetButtonTitle(preset, settings, this.activePreset);
     }
 
     if (store.preset_button_titles === JSON.stringify(nextTitles)) {
@@ -241,6 +271,51 @@ class SoundTouchDevice extends Homey.Device {
     if (typeof this.setStoreValue === "function") {
       await this.setStoreValue("preset_button_titles", JSON.stringify(nextTitles));
     }
+  }
+
+  getPresetLabel(preset, settings = this.getSettings()) {
+    if (!preset) {
+      return "None";
+    }
+
+    const configuredName = String(settings[`preset${preset}_name`] || "").trim();
+    return configuredName ? `${preset}. ${configuredName}` : `Preset ${preset}`;
+  }
+
+  async setActivePreset(preset, settings = this.getSettings()) {
+    const nextPreset = Number.isInteger(preset) && preset >= 1 && preset <= 6 ? preset : null;
+    if (this.activePreset === nextPreset) {
+      await this.syncActivePresetSetting(settings);
+      return;
+    }
+
+    this.activePreset = nextPreset;
+    if (typeof this.setStoreValue === "function") {
+      await this.setStoreValue("active_preset", nextPreset || 0);
+    }
+    await this.syncActivePresetSetting(settings);
+    await this.syncPresetButtonTitles(settings);
+  }
+
+  async syncActivePresetSetting(settings = this.getSettings()) {
+    await this.setSettings({
+      active_preset: this.getPresetLabel(this.activePreset, settings),
+    });
+  }
+
+  findPresetByUrl(url, settings = this.getSettings()) {
+    const normalizedUrl = String(url || "").trim();
+    if (!normalizedUrl) {
+      return null;
+    }
+
+    for (let preset = 1; preset <= 6; preset += 1) {
+      if (String(settings[`preset${preset}_url`] || "").trim() === normalizedUrl) {
+        return preset;
+      }
+    }
+
+    return null;
   }
 
   registerCapabilityListeners() {
@@ -285,8 +360,8 @@ class SoundTouchDevice extends Homey.Device {
       ]);
       const status = extractNowPlayingStatus(nowPlaying);
       await this.updateNowPlayingStatus(status);
+      await this.updateActivePresetFromStatus(status);
       await this.setCapabilityValueIfAvailable("onoff", !status.isStandby);
-      await this.setCapabilityValueIfAvailable("connectivity_alarm", false);
       if (volume !== null) {
         await this.setCapabilityValueIfAvailable("volume_set", volume / 100);
       }
@@ -309,7 +384,6 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("open", async () => {
       this.log("Bose WebSocket connected");
-      await this.setCapabilityValueIfAvailable("connectivity_alarm", false);
       await this.setAvailable();
     });
 
@@ -321,16 +395,16 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("close", () => {
       this.log("Bose WebSocket closed");
-      this.setCapabilityValueIfAvailable("connectivity_alarm", true).catch((error) => {
-        this.error(`Failed to set connectivity alarm: ${error.message}`);
+      this.setUnavailable("Speaker connection lost. Reconnecting...").catch((error) => {
+        this.error(`Failed to mark speaker unavailable: ${error.message}`);
       });
       this.scheduleReconnect();
     });
 
     this.ws.on("error", (error) => {
       this.error(`Bose WebSocket error: ${error.message}`);
-      this.setCapabilityValueIfAvailable("connectivity_alarm", true).catch((capabilityError) => {
-        this.error(`Failed to set connectivity alarm: ${capabilityError.message}`);
+      this.setUnavailable(`Speaker connection error: ${error.message}`).catch((availabilityError) => {
+        this.error(`Failed to mark speaker unavailable: ${availabilityError.message}`);
       });
     });
   }
@@ -373,8 +447,8 @@ class SoundTouchDevice extends Homey.Device {
     const settings = this.getSettings();
     if (settings.debug_enabled) {
       this.log(`Bose WebSocket event: ${rawEvent}`);
+      await this.setSettings({ last_event: rawEvent.slice(0, 500) });
     }
-    await this.setSettings({ last_event: rawEvent.slice(0, 500) });
     await this.updateTelemetryFromEvent(rawEvent);
 
     const preset = extractPresetNumber(rawEvent);
@@ -408,24 +482,54 @@ class SoundTouchDevice extends Homey.Device {
     const nowPlayingStatus = extractNowPlayingStatus(rawEvent);
     if (nowPlayingStatus.rawSource) {
       await this.updateNowPlayingStatus(nowPlayingStatus);
+      await this.updateActivePresetFromStatus(nowPlayingStatus);
       await this.setCapabilityValueIfAvailable("onoff", !nowPlayingStatus.isStandby);
     }
   }
 
+  async updateActivePresetFromStatus(status) {
+    if (status.isStandby) {
+      await this.setActivePreset(null);
+      return;
+    }
+
+    const matchedPreset = this.findPresetByUrl(status.summary);
+    if (matchedPreset) {
+      await this.setActivePreset(matchedPreset);
+    }
+  }
+
   async updateConnectionState(connectionState) {
-    const settings = {
-      connection_state: connectionState.state || "Unknown",
-      wifi_signal: connectionState.signal || "Unknown",
-    };
-    await this.setSettings(settings);
-    await this.setCapabilityValueIfAvailable("connectivity_alarm", !connectionState.up);
+    this.connectionState = connectionState.state || null;
+    this.wifiSignal = connectionState.signal || null;
+    await this.setSettings({
+      speaker_status: this.formatSpeakerStatus(),
+    });
+
+    if (connectionState.up) {
+      await this.setAvailable();
+    } else {
+      await this.setUnavailable(connectionState.state || "Speaker is offline.");
+    }
   }
 
   async updateNowPlayingStatus(status) {
+    this.currentSource = status.source || null;
+    this.nowPlaying = status.summary || null;
     await this.setSettings({
-      current_source: status.source || "Unknown",
-      now_playing_summary: status.summary || "Unknown",
+      speaker_status: this.formatSpeakerStatus(),
     });
+  }
+
+  formatSpeakerStatus() {
+    const parts = [];
+    if (this.connectionState) {
+      parts.push(this.wifiSignal ? `${this.connectionState} (${this.wifiSignal})` : this.connectionState);
+    }
+    if (this.currentSource) {
+      parts.push(`Source: ${this.currentSource}`);
+    }
+    return parts.length ? parts.join(" | ") : "Unknown";
   }
 
   async playConfiguredPreset(preset) {
@@ -441,7 +545,7 @@ class SoundTouchDevice extends Homey.Device {
       return;
     }
 
-    await this.playStream(url);
+    await this.playStream(url, { presetNumber });
   }
 
   async turnOn() {
@@ -462,6 +566,7 @@ class SoundTouchDevice extends Homey.Device {
     this.log(`Putting ${this.address} in standby`);
     await standby(this.address);
     await this.setCapabilityValueIfAvailable("onoff", false);
+    await this.setActivePreset(null);
   }
 
   async stop() {
@@ -471,6 +576,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Stopping playback on ${this.address}`);
     await stopPlayback(this.address);
+    await this.setActivePreset(null);
   }
 
   async setSpeakerVolume(value) {
@@ -482,7 +588,7 @@ class SoundTouchDevice extends Homey.Device {
     await this.setCapabilityValueIfAvailable("volume_set", value);
   }
 
-  async playStream(url, { volume } = {}) {
+  async playStream(url, { volume, presetNumber = null } = {}) {
     if (!this.address) {
       throw new Error("No speaker IP address configured.");
     }
@@ -490,11 +596,14 @@ class SoundTouchDevice extends Homey.Device {
     this.log(`Playing stream on ${this.address}: ${url}`);
     await playStream(this.address, url, { volume });
     await this.setCapabilityValueIfAvailable("onoff", true);
+    const activePreset = presetNumber || this.findPresetByUrl(url);
+    await this.setActivePreset(activePreset);
 
     try {
       const nowPlaying = await getNowPlaying(this.address);
       const status = extractNowPlayingStatus(nowPlaying);
       await this.updateNowPlayingStatus(status);
+      await this.updateActivePresetFromStatus(status);
       this.log(`Now playing: ${compactXml(nowPlaying)}`);
     } catch (error) {
       this.log(`Could not verify now playing after starting stream: ${error.message}`);
