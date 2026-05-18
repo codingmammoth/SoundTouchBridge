@@ -13,8 +13,8 @@ class SoundTouchDriver extends Homey.Driver {
 
     this.presetPressedTrigger = this.homey.flow.getDeviceTriggerCard("preset_pressed");
 
-    this.homey.flow.getActionCard("play_preset_1").registerRunListener(async ({ device }) => {
-      await device.playConfiguredPreset(1);
+    this.homey.flow.getActionCard("play_preset_slot").registerRunListener(async ({ device, preset }) => {
+      await device.playConfiguredPreset(preset?.id ?? preset);
     });
 
     this.homey.flow.getActionCard("play_stream").registerRunListener(async ({ device, url }) => {

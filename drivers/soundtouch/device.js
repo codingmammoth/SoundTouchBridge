@@ -141,11 +141,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Detected preset ${preset}`);
     await this.driver.triggerPresetPressed(this, { preset, raw_event: rawEvent });
-
-    const configuredButton = String(this.getSettings().preset1_button || "1");
-    if (String(preset) === configuredButton) {
-      await this.playConfiguredPreset(1);
-    }
+    await this.playConfiguredPreset(preset);
   }
 
   isDebounced(preset) {
@@ -156,14 +152,16 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async playConfiguredPreset(preset) {
-    if (preset !== 1) {
-      throw new Error(`Preset ${preset} is not implemented yet.`);
+    const presetNumber = Number(preset?.id ?? preset);
+    if (!Number.isInteger(presetNumber) || presetNumber < 1 || presetNumber > 6) {
+      throw new Error(`Preset ${preset} is not valid.`);
     }
 
     const settings = this.getSettings();
-    const url = String(settings.preset1_url || "").trim();
+    const url = String(settings[`preset${presetNumber}_url`] || "").trim();
     if (!url) {
-      throw new Error("Preset 1 stream URL is empty.");
+      this.log(`Preset ${presetNumber} has no stream URL configured.`);
+      return;
     }
 
     await this.playStream(url);

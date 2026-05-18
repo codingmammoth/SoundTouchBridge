@@ -67,15 +67,63 @@
     ],
     "actions": [
       {
-        "id": "play_preset_1",
+        "id": "play_preset_slot",
         "title": {
-          "en": "Play configured preset 1"
+          "en": "Play configured preset"
+        },
+        "titleFormatted": {
+          "en": "Play configured preset [[preset]]"
         },
         "args": [
           {
             "type": "device",
             "name": "device",
             "filter": "driver_id=soundtouch"
+          },
+          {
+            "name": "preset",
+            "type": "dropdown",
+            "title": {
+              "en": "Preset"
+            },
+            "values": [
+              {
+                "id": "1",
+                "label": {
+                  "en": "Preset 1"
+                }
+              },
+              {
+                "id": "2",
+                "label": {
+                  "en": "Preset 2"
+                }
+              },
+              {
+                "id": "3",
+                "label": {
+                  "en": "Preset 3"
+                }
+              },
+              {
+                "id": "4",
+                "label": {
+                  "en": "Preset 4"
+                }
+              },
+              {
+                "id": "5",
+                "label": {
+                  "en": "Preset 5"
+                }
+              },
+              {
+                "id": "6",
+                "label": {
+                  "en": "Preset 6"
+                }
+              }
+            ]
           }
         ]
       },
@@ -183,59 +231,9 @@
         {
           "type": "group",
           "label": {
-            "en": "Preset bridge"
+            "en": "Preset 1"
           },
           "children": [
-            {
-              "id": "preset1_button",
-              "type": "dropdown",
-              "label": {
-                "en": "Physical preset button"
-              },
-              "value": "1",
-              "highlight": true,
-              "values": [
-                {
-                  "id": "1",
-                  "label": {
-                    "en": "Preset 1"
-                  }
-                },
-                {
-                  "id": "2",
-                  "label": {
-                    "en": "Preset 2"
-                  }
-                },
-                {
-                  "id": "3",
-                  "label": {
-                    "en": "Preset 3"
-                  }
-                },
-                {
-                  "id": "4",
-                  "label": {
-                    "en": "Preset 4"
-                  }
-                },
-                {
-                  "id": "5",
-                  "label": {
-                    "en": "Preset 5"
-                  }
-                },
-                {
-                  "id": "6",
-                  "label": {
-                    "en": "Preset 6"
-                  }
-                }
-              ],
-              "hint": {
-                "en": "The physical Bose button that should start the configured stream."
-              }
-            },
             {
               "id": "preset1_name",
               "type": "text",
@@ -254,7 +252,152 @@
               "value": "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
               "highlight": true,
               "hint": {
-                "en": "Used when the selected physical preset button is detected or the Flow action is run."
+                "en": "Used when physical preset 1 is detected or the Flow action is run."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset 2"
+          },
+          "children": [
+            {
+              "id": "preset2_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "",
+              "highlight": true
+            },
+            {
+              "id": "preset2_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Used when physical preset 2 is detected or the Flow action is run."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset 3"
+          },
+          "children": [
+            {
+              "id": "preset3_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "",
+              "highlight": true
+            },
+            {
+              "id": "preset3_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Used when physical preset 3 is detected or the Flow action is run."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset 4"
+          },
+          "children": [
+            {
+              "id": "preset4_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "",
+              "highlight": true
+            },
+            {
+              "id": "preset4_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Used when physical preset 4 is detected or the Flow action is run."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset 5"
+          },
+          "children": [
+            {
+              "id": "preset5_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "",
+              "highlight": true
+            },
+            {
+              "id": "preset5_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Used when physical preset 5 is detected or the Flow action is run."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset 6"
+          },
+          "children": [
+            {
+              "id": "preset6_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "",
+              "highlight": true
+            },
+            {
+              "id": "preset6_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Used when physical preset 6 is detected or the Flow action is run."
               }
             }
           ]

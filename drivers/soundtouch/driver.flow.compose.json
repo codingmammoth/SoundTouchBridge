@@ -25,10 +25,60 @@
   ],
   "actions": [
     {
-      "id": "play_preset_1",
+      "id": "play_preset_slot",
       "title": {
-        "en": "Play configured preset 1"
-      }
+        "en": "Play configured preset"
+      },
+      "titleFormatted": {
+        "en": "Play configured preset [[preset]]"
+      },
+      "args": [
+        {
+          "name": "preset",
+          "type": "dropdown",
+          "title": {
+            "en": "Preset"
+          },
+          "values": [
+            {
+              "id": "1",
+              "label": {
+                "en": "Preset 1"
+              }
+            },
+            {
+              "id": "2",
+              "label": {
+                "en": "Preset 2"
+              }
+            },
+            {
+              "id": "3",
+              "label": {
+                "en": "Preset 3"
+              }
+            },
+            {
+              "id": "4",
+              "label": {
+                "en": "Preset 4"
+              }
+            },
+            {
+              "id": "5",
+              "label": {
+                "en": "Preset 5"
+              }
+            },
+            {
+              "id": "6",
+              "label": {
+                "en": "Preset 6"
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "play_stream",

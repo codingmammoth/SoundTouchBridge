@@ -67,14 +67,15 @@ Version 0.1 should support:
 - one or more paired Bose SoundTouch speakers
 - automatic discovery during pairing
 - manual IP fallback
-- one configured preset URL per speaker, mapped to a chosen physical preset
-  button
+- six configured preset URLs per speaker
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
 - reconnect logic for WebSocket disconnects
 - clear unavailable state when the speaker or UPnP service is unreachable
 
-After the event format is verified, expand to six preset slots per speaker.
+The current implementation already exposes six preset slots in device settings.
+The remaining validation step is to capture the exact WebSocket payload emitted
+by each physical preset button on real speakers.
 
 ## Developer Test Flow
 
@@ -111,7 +112,9 @@ Then:
 4. Keep the Homey CLI logs open.
 5. Press physical preset buttons on the speaker.
 6. Check the logs and the device setting "Last WebSocket event".
-7. Create a Flow action for the paired speaker: "Play stream".
+7. Configure stream URLs for preset slots 1 through 6 in device settings.
+8. Create a Flow action for the paired speaker: "Play stream" or
+   "Play configured preset".
 
 The first development goal is to capture the exact WebSocket payload emitted by
 the speaker when each physical preset button is pressed.
@@ -128,7 +131,8 @@ The current app prototype:
 - logs raw WebSocket events while debug logging is enabled
 - stores the latest raw WebSocket event in device settings
 - triggers a Homey Flow card when a preset event is detected
-- maps the selected physical preset button to the configured stream URL
+- maps physical preset 1 through 6 to configured stream URLs
+- provides a Flow action to play a configured preset slot
 - provides a Flow action to play any stream URL through UPnP
 
 The preset parser is intentionally broad until we capture real events from more
