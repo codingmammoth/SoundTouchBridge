@@ -7,12 +7,7 @@ const {
   getInfo,
 } = require("../../lib/soundtouch-client");
 
-const RADIO_DEVICE_ICONS = [
-  "/icons/radio-dial.svg",
-  "/icons/radio-wave.svg",
-  "/icons/radio-boombox.svg",
-  "/icons/radio-tower.svg",
-];
+const RADIO_DEVICE_ICON = "/icon.svg";
 
 class SoundTouchDriver extends Homey.Driver {
   async onInit() {
@@ -54,16 +49,15 @@ class SoundTouchDriver extends Homey.Driver {
         const infoXml = await getInfo(address);
         const id = extractDeviceId(infoXml) || result.id || address;
         const name = extractName(infoXml) || result.name || `SoundTouch ${address}`;
-        const icon = this.getRadioDeviceIcon(id);
 
         speakers.push({
           name,
           data: { id },
-          icon,
+          icon: RADIO_DEVICE_ICON,
           store: {
             address,
             discoveryId: result.id,
-            icon,
+            icon: RADIO_DEVICE_ICON,
           },
           settings: {
             ip_address: address,
@@ -75,15 +69,6 @@ class SoundTouchDriver extends Homey.Driver {
     }
 
     return speakers;
-  }
-
-  getRadioDeviceIcon(id) {
-    const text = String(id || "");
-    let hash = 0;
-    for (let index = 0; index < text.length; index += 1) {
-      hash = ((hash * 31) + text.charCodeAt(index)) >>> 0;
-    }
-    return RADIO_DEVICE_ICONS[hash % RADIO_DEVICE_ICONS.length];
   }
 
   async triggerPresetPressed(device, tokens) {

@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Boombox radio">
-  <path d="M22 17h20a5 5 0 0 1 5 5v3H17v-3a5 5 0 0 1 5-5Z" fill="#222"/>
-  <rect x="8" y="24" width="48" height="29" rx="6" fill="#222"/>
-  <circle cx="22" cy="39" r="8" fill="none" stroke="#f2f2f2" stroke-width="4"/>
-  <circle cx="42" cy="39" r="8" fill="none" stroke="#f2f2f2" stroke-width="4"/>
-  <path d="M28 30h8M30 34h4" stroke="#f2f2f2" stroke-width="3" stroke-linecap="round"/>
-</svg>

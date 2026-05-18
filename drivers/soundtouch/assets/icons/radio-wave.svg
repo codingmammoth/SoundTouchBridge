@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Radio waves">
-  <rect x="11" y="21" width="42" height="30" rx="7" fill="#222"/>
-  <path d="M18 21 42 10" stroke="#222" stroke-width="4" stroke-linecap="round"/>
-  <rect x="18" y="31" width="17" height="11" rx="2" fill="#f2f2f2"/>
-  <circle cx="45" cy="37" r="4" fill="#f2f2f2"/>
-  <path d="M42 19c4 2 7 6 7 11M47 13c6 4 10 10 10 17" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>
-</svg>
