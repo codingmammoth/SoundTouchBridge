@@ -167,48 +167,49 @@
       },
       "class": "speaker",
       "capabilities": [
-        "button.preset_1",
-        "button.preset_2",
-        "button.preset_3",
-        "button.preset_4",
-        "button.preset_5",
-        "button.preset_6",
-        "button.stop",
+        "preset_1",
+        "preset_2",
+        "preset_3",
+        "preset_4",
+        "preset_5",
+        "preset_6",
+        "stop_playback",
         "onoff",
-        "volume_set"
+        "volume_set",
+        "connectivity_alarm"
       ],
       "capabilitiesOptions": {
-        "button.stop": {
+        "stop_playback": {
           "title": {
             "en": "Stop"
           }
         },
-        "button.preset_1": {
+        "preset_1": {
           "title": {
             "en": "Preset 1"
           }
         },
-        "button.preset_2": {
+        "preset_2": {
           "title": {
             "en": "Preset 2"
           }
         },
-        "button.preset_3": {
+        "preset_3": {
           "title": {
             "en": "Preset 3"
           }
         },
-        "button.preset_4": {
+        "preset_4": {
           "title": {
             "en": "Preset 4"
           }
         },
-        "button.preset_5": {
+        "preset_5": {
           "title": {
             "en": "Preset 5"
           }
         },
-        "button.preset_6": {
+        "preset_6": {
           "title": {
             "en": "Preset 6"
           }
@@ -264,6 +265,38 @@
               "hint": {
                 "en": "Log raw Bose WebSocket events while we identify preset payloads."
               }
+            },
+            {
+              "id": "connection_state",
+              "type": "label",
+              "label": {
+                "en": "Connection state"
+              },
+              "value": "Unknown"
+            },
+            {
+              "id": "wifi_signal",
+              "type": "label",
+              "label": {
+                "en": "Wi-Fi signal"
+              },
+              "value": "Unknown"
+            },
+            {
+              "id": "current_source",
+              "type": "label",
+              "label": {
+                "en": "Current source"
+              },
+              "value": "Unknown"
+            },
+            {
+              "id": "now_playing_summary",
+              "type": "label",
+              "label": {
+                "en": "Now playing"
+              },
+              "value": "Unknown"
             },
             {
               "id": "last_event",
@@ -452,6 +485,91 @@
       ]
     }
   ],
+  "capabilities": {
+    "connectivity_alarm": {
+      "title": {
+        "en": "Connectivity alarm"
+      },
+      "desc": {
+        "en": "True when Homey cannot reach the SoundTouch speaker."
+      },
+      "type": "boolean",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/connectivity.svg"
+    },
+    "preset_1": {
+      "title": {
+        "en": "Preset 1"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-1.svg"
+    },
+    "preset_2": {
+      "title": {
+        "en": "Preset 2"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-2.svg"
+    },
+    "preset_3": {
+      "title": {
+        "en": "Preset 3"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-3.svg"
+    },
+    "preset_4": {
+      "title": {
+        "en": "Preset 4"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-4.svg"
+    },
+    "preset_5": {
+      "title": {
+        "en": "Preset 5"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-5.svg"
+    },
+    "preset_6": {
+      "title": {
+        "en": "Preset 6"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/preset-6.svg"
+    },
+    "stop_playback": {
+      "title": {
+        "en": "Stop"
+      },
+      "type": "boolean",
+      "getable": false,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/icons/stop.svg"
+    }
+  },
   "discovery": {
     "soundtouch-mdns": {
       "type": "mdns-sd",

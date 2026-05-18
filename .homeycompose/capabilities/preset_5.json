@@ -1,0 +1,10 @@
+{
+  "title": {
+    "en": "Preset 5"
+  },
+  "type": "boolean",
+  "getable": false,
+  "setable": true,
+  "uiComponent": "button",
+  "icon": "/assets/icons/preset-5.svg"
+}

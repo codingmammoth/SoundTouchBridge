@@ -29,6 +29,38 @@
         }
       },
       {
+        "id": "connection_state",
+        "type": "label",
+        "label": {
+          "en": "Connection state"
+        },
+        "value": "Unknown"
+      },
+      {
+        "id": "wifi_signal",
+        "type": "label",
+        "label": {
+          "en": "Wi-Fi signal"
+        },
+        "value": "Unknown"
+      },
+      {
+        "id": "current_source",
+        "type": "label",
+        "label": {
+          "en": "Current source"
+        },
+        "value": "Unknown"
+      },
+      {
+        "id": "now_playing_summary",
+        "type": "label",
+        "label": {
+          "en": "Now playing"
+        },
+        "value": "Unknown"
+      },
+      {
         "id": "last_event",
         "type": "label",
         "label": {

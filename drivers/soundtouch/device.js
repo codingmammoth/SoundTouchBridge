@@ -4,6 +4,8 @@ const Homey = require("homey");
 const WebSocket = require("ws");
 const {
   compactXml,
+  extractConnectionState,
+  extractNowPlayingStatus,
   extractPresetNumber,
   getNowPlaying,
   getVolume,
@@ -19,6 +21,18 @@ const WEBSOCKET_PROTOCOL = "gabbo";
 const RECONNECT_DELAY_MS = 10000;
 const PRESET_DEBOUNCE_MS = 1500;
 const ORDERED_CAPABILITIES = [
+  "preset_1",
+  "preset_2",
+  "preset_3",
+  "preset_4",
+  "preset_5",
+  "preset_6",
+  "stop_playback",
+  "onoff",
+  "volume_set",
+  "connectivity_alarm",
+];
+const DEPRECATED_CAPABILITIES = [
   "button.preset_1",
   "button.preset_2",
   "button.preset_3",
@@ -26,8 +40,7 @@ const ORDERED_CAPABILITIES = [
   "button.preset_5",
   "button.preset_6",
   "button.stop",
-  "onoff",
-  "volume_set",
+  "speaker_stop",
 ];
 
 class SoundTouchDevice extends Homey.Device {
@@ -87,6 +100,10 @@ class SoundTouchDevice extends Homey.Device {
 
   shouldReorderCapabilities() {
     const currentCapabilities = this.getCapabilities();
+    if (currentCapabilities.some((capability) => DEPRECATED_CAPABILITIES.includes(capability))) {
+      return true;
+    }
+
     const managedCapabilities = currentCapabilities.filter((capability) => (
       ORDERED_CAPABILITIES.includes(capability)
     ));
@@ -95,6 +112,12 @@ class SoundTouchDevice extends Homey.Device {
 
   async reorderCapabilities() {
     this.log("Reordering dashboard controls");
+
+    for (const capability of DEPRECATED_CAPABILITIES) {
+      if (this.hasCapability(capability)) {
+        await this.removeCapability(capability);
+      }
+    }
 
     for (const capability of ORDERED_CAPABILITIES) {
       if (this.hasCapability(capability)) {
@@ -127,12 +150,12 @@ class SoundTouchDevice extends Homey.Device {
       await this.setSpeakerVolume(value);
     });
 
-    this.registerCapabilityListener("button.stop", async () => {
+    this.registerCapabilityListener("stop_playback", async () => {
       await this.stop();
     });
 
     for (let preset = 1; preset <= 6; preset += 1) {
-      this.registerCapabilityListener(`button.preset_${preset}`, async () => {
+      this.registerCapabilityListener(`preset_${preset}`, async () => {
         await this.playConfiguredPreset(preset);
       });
     }
@@ -154,7 +177,10 @@ class SoundTouchDevice extends Homey.Device {
         getNowPlaying(this.address),
         getVolume(this.address),
       ]);
-      await this.setCapabilityValueIfAvailable("onoff", !nowPlaying.includes('source="STANDBY"'));
+      const status = extractNowPlayingStatus(nowPlaying);
+      await this.updateNowPlayingStatus(status);
+      await this.setCapabilityValueIfAvailable("onoff", !status.isStandby);
+      await this.setCapabilityValueIfAvailable("connectivity_alarm", false);
       if (volume !== null) {
         await this.setCapabilityValueIfAvailable("volume_set", volume / 100);
       }
@@ -177,6 +203,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("open", async () => {
       this.log("Bose WebSocket connected");
+      await this.setCapabilityValueIfAvailable("connectivity_alarm", false);
       await this.setAvailable();
     });
 
@@ -188,11 +215,17 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("close", () => {
       this.log("Bose WebSocket closed");
+      this.setCapabilityValueIfAvailable("connectivity_alarm", true).catch((error) => {
+        this.error(`Failed to set connectivity alarm: ${error.message}`);
+      });
       this.scheduleReconnect();
     });
 
     this.ws.on("error", (error) => {
       this.error(`Bose WebSocket error: ${error.message}`);
+      this.setCapabilityValueIfAvailable("connectivity_alarm", true).catch((capabilityError) => {
+        this.error(`Failed to set connectivity alarm: ${capabilityError.message}`);
+      });
     });
   }
 
@@ -236,6 +269,7 @@ class SoundTouchDevice extends Homey.Device {
       this.log(`Bose WebSocket event: ${rawEvent}`);
     }
     await this.setSettings({ last_event: rawEvent.slice(0, 500) });
+    await this.updateTelemetryFromEvent(rawEvent);
 
     const preset = extractPresetNumber(rawEvent);
     if (!preset) {
@@ -257,6 +291,35 @@ class SoundTouchDevice extends Homey.Device {
     const lastAt = this.lastPresetAt.get(preset) || 0;
     this.lastPresetAt.set(preset, now);
     return now - lastAt < PRESET_DEBOUNCE_MS;
+  }
+
+  async updateTelemetryFromEvent(rawEvent) {
+    const connectionState = extractConnectionState(rawEvent);
+    if (connectionState) {
+      await this.updateConnectionState(connectionState);
+    }
+
+    const nowPlayingStatus = extractNowPlayingStatus(rawEvent);
+    if (nowPlayingStatus.rawSource) {
+      await this.updateNowPlayingStatus(nowPlayingStatus);
+      await this.setCapabilityValueIfAvailable("onoff", !nowPlayingStatus.isStandby);
+    }
+  }
+
+  async updateConnectionState(connectionState) {
+    const settings = {
+      connection_state: connectionState.state || "Unknown",
+      wifi_signal: connectionState.signal || "Unknown",
+    };
+    await this.setSettings(settings);
+    await this.setCapabilityValueIfAvailable("connectivity_alarm", !connectionState.up);
+  }
+
+  async updateNowPlayingStatus(status) {
+    await this.setSettings({
+      current_source: status.source || "Unknown",
+      now_playing_summary: status.summary || "Unknown",
+    });
   }
 
   async playConfiguredPreset(preset) {
@@ -324,6 +387,8 @@ class SoundTouchDevice extends Homey.Device {
 
     try {
       const nowPlaying = await getNowPlaying(this.address);
+      const status = extractNowPlayingStatus(nowPlaying);
+      await this.updateNowPlayingStatus(status);
       this.log(`Now playing: ${compactXml(nowPlaying)}`);
     } catch (error) {
       this.log(`Could not verify now playing after starting stream: ${error.message}`);

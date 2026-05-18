@@ -9,48 +9,49 @@
   },
   "class": "speaker",
   "capabilities": [
-    "button.preset_1",
-    "button.preset_2",
-    "button.preset_3",
-    "button.preset_4",
-    "button.preset_5",
-    "button.preset_6",
-    "button.stop",
+    "preset_1",
+    "preset_2",
+    "preset_3",
+    "preset_4",
+    "preset_5",
+    "preset_6",
+    "stop_playback",
     "onoff",
-    "volume_set"
+    "volume_set",
+    "connectivity_alarm"
   ],
   "capabilitiesOptions": {
-    "button.stop": {
+    "stop_playback": {
       "title": {
         "en": "Stop"
       }
     },
-    "button.preset_1": {
+    "preset_1": {
       "title": {
         "en": "Preset 1"
       }
     },
-    "button.preset_2": {
+    "preset_2": {
       "title": {
         "en": "Preset 2"
       }
     },
-    "button.preset_3": {
+    "preset_3": {
       "title": {
         "en": "Preset 3"
       }
     },
-    "button.preset_4": {
+    "preset_4": {
       "title": {
         "en": "Preset 4"
       }
     },
-    "button.preset_5": {
+    "preset_5": {
       "title": {
         "en": "Preset 5"
       }
     },
-    "button.preset_6": {
+    "preset_6": {
       "title": {
         "en": "Preset 6"
       }

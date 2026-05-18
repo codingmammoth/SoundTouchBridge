@@ -71,6 +71,8 @@ Version 0.1 should support:
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
 - Homey device controls for power, stop, volume, and preset buttons
+- useful speaker metadata in device settings: connection state, Wi-Fi signal,
+  current source, now playing, and last raw WebSocket event
 - reconnect logic for WebSocket disconnects
 - clear unavailable state when the speaker or UPnP service is unreachable
 
@@ -131,15 +133,18 @@ The current app prototype:
 - connects to `ws://<speaker-ip>:8080` using subprotocol `gabbo`
 - logs raw WebSocket events while debug logging is enabled
 - stores the latest raw WebSocket event in device settings
+- stores connection state, Wi-Fi signal, current source, and now playing
+  metadata in device settings
 - triggers a Homey Flow card when a preset event is detected
 - maps physical preset 1 through 6 to configured stream URLs
 - provides a Flow action to play a configured preset slot
 - provides a Flow action to play any stream URL through UPnP
 - exposes Homey device controls:
+  - preset 1 through 6 buttons with preset icons
+  - stop button with a stop icon
   - on/off toggle
   - volume slider
-  - stop button
-  - preset 1 through 6 buttons
+  - connectivity alarm
 
 The preset parser is intentionally broad until we capture real events from more
 speakers. It looks for common forms such as `PRESET_1`, `preset1`, and
