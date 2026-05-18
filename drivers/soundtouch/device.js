@@ -18,6 +18,17 @@ const WEBSOCKET_PORT = 8080;
 const WEBSOCKET_PROTOCOL = "gabbo";
 const RECONNECT_DELAY_MS = 10000;
 const PRESET_DEBOUNCE_MS = 1500;
+const REQUIRED_CAPABILITIES = [
+  "onoff",
+  "volume_set",
+  "button.stop",
+  "button.preset_1",
+  "button.preset_2",
+  "button.preset_3",
+  "button.preset_4",
+  "button.preset_5",
+  "button.preset_6",
+];
 
 class SoundTouchDevice extends Homey.Device {
   async onInit() {
@@ -27,6 +38,7 @@ class SoundTouchDevice extends Homey.Device {
     this.log("SoundTouch device initialized");
 
     await this.refreshAddressFromSettings();
+    await this.ensureCapabilities();
     this.registerCapabilityListeners();
     await this.syncStatus();
     this.connectWebSocket();
@@ -62,6 +74,15 @@ class SoundTouchDevice extends Homey.Device {
     await this.setAvailable();
   }
 
+  async ensureCapabilities() {
+    for (const capability of REQUIRED_CAPABILITIES) {
+      if (!this.hasCapability(capability)) {
+        this.log(`Adding missing capability ${capability}`);
+        await this.addCapability(capability);
+      }
+    }
+  }
+
   registerCapabilityListeners() {
     this.registerCapabilityListener("onoff", async (value) => {
       if (value) {
@@ -86,6 +107,12 @@ class SoundTouchDevice extends Homey.Device {
     }
   }
 
+  async setCapabilityValueIfAvailable(capability, value) {
+    if (this.hasCapability(capability)) {
+      await this.setCapabilityValue(capability, value);
+    }
+  }
+
   async syncStatus() {
     if (!this.address) {
       return;
@@ -96,9 +123,9 @@ class SoundTouchDevice extends Homey.Device {
         getNowPlaying(this.address),
         getVolume(this.address),
       ]);
-      await this.setCapabilityValue("onoff", !nowPlaying.includes('source="STANDBY"'));
+      await this.setCapabilityValueIfAvailable("onoff", !nowPlaying.includes('source="STANDBY"'));
       if (volume !== null) {
-        await this.setCapabilityValue("volume_set", volume / 100);
+        await this.setCapabilityValueIfAvailable("volume_set", volume / 100);
       }
     } catch (error) {
       this.log(`Could not sync speaker status: ${error.message}`);
@@ -224,7 +251,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Turning on ${this.address}`);
     await selectLastSource(this.address);
-    await this.setCapabilityValue("onoff", true);
+    await this.setCapabilityValueIfAvailable("onoff", true);
   }
 
   async turnOff() {
@@ -234,7 +261,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Putting ${this.address} in standby`);
     await standby(this.address);
-    await this.setCapabilityValue("onoff", false);
+    await this.setCapabilityValueIfAvailable("onoff", false);
   }
 
   async stop() {
@@ -252,7 +279,7 @@ class SoundTouchDevice extends Homey.Device {
     }
 
     await setVolume(this.address, value);
-    await this.setCapabilityValue("volume_set", value);
+    await this.setCapabilityValueIfAvailable("volume_set", value);
   }
 
   async playStream(url, { volume } = {}) {
@@ -262,7 +289,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Playing stream on ${this.address}: ${url}`);
     await playStream(this.address, url, { volume });
-    await this.setCapabilityValue("onoff", true);
+    await this.setCapabilityValueIfAvailable("onoff", true);
 
     const nowPlaying = await getNowPlaying(this.address);
     this.log(`Now playing: ${compactXml(nowPlaying)}`);
