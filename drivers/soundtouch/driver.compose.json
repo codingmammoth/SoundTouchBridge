@@ -1,0 +1,28 @@
+{
+  "name": {
+    "en": "SoundTouch speaker"
+  },
+  "images": {
+    "small": "/drivers/soundtouch/assets/images/small.png",
+    "large": "/drivers/soundtouch/assets/images/large.png",
+    "xlarge": "/drivers/soundtouch/assets/images/xlarge.png"
+  },
+  "class": "speaker",
+  "capabilities": [],
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "discovery": "soundtouch-mdns",
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

@@ -1,0 +1,275 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.codingmammoth.homeybose",
+  "version": "0.1.0",
+  "compatibility": ">=5.0.0",
+  "runtime": "nodejs",
+  "platforms": [
+    "local"
+  ],
+  "sdk": 3,
+  "brandColor": "#222222",
+  "name": {
+    "en": "SoundTouch Bridge"
+  },
+  "description": {
+    "en": "Local preset and stream bridge for Bose SoundTouch speakers."
+  },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "category": "music",
+  "tags": {
+    "en": [
+      "bose",
+      "soundtouch",
+      "radio",
+      "music",
+      "upnp"
+    ]
+  },
+  "author": {
+    "name": "CodingMammoth"
+  },
+  "flow": {
+    "triggers": [
+      {
+        "id": "preset_pressed",
+        "title": {
+          "en": "A preset button was pressed"
+        },
+        "tokens": [
+          {
+            "name": "preset",
+            "type": "number",
+            "title": {
+              "en": "Preset"
+            }
+          },
+          {
+            "name": "raw_event",
+            "type": "string",
+            "title": {
+              "en": "Raw event"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=soundtouch"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "play_preset_1",
+        "title": {
+          "en": "Play configured preset 1"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=soundtouch"
+          }
+        ]
+      },
+      {
+        "id": "play_stream",
+        "title": {
+          "en": "Play stream"
+        },
+        "titleFormatted": {
+          "en": "Play stream [[url]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=soundtouch"
+          },
+          {
+            "name": "url",
+            "type": "text",
+            "title": {
+              "en": "Stream URL"
+            },
+            "placeholder": {
+              "en": "http://example.com/stream.mp3"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "SoundTouch speaker"
+      },
+      "images": {
+        "small": "/drivers/soundtouch/assets/images/small.png",
+        "large": "/drivers/soundtouch/assets/images/large.png",
+        "xlarge": "/drivers/soundtouch/assets/images/xlarge.png"
+      },
+      "class": "speaker",
+      "capabilities": [],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "discovery": "soundtouch-mdns",
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "soundtouch",
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Connection"
+          },
+          "children": [
+            {
+              "id": "ip_address",
+              "type": "text",
+              "label": {
+                "en": "IP address"
+              },
+              "value": "",
+              "highlight": true,
+              "hint": {
+                "en": "Usually filled by discovery. You can edit it if the speaker changes address."
+              }
+            },
+            {
+              "id": "debug_enabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Debug logging"
+              },
+              "value": true,
+              "hint": {
+                "en": "Log raw Bose WebSocket events while we identify preset payloads."
+              }
+            },
+            {
+              "id": "last_event",
+              "type": "label",
+              "label": {
+                "en": "Last WebSocket event"
+              },
+              "value": "None yet"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Preset bridge"
+          },
+          "children": [
+            {
+              "id": "preset1_button",
+              "type": "dropdown",
+              "label": {
+                "en": "Physical preset button"
+              },
+              "value": "1",
+              "highlight": true,
+              "values": [
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "Preset 1"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Preset 2"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Preset 3"
+                  }
+                },
+                {
+                  "id": "4",
+                  "label": {
+                    "en": "Preset 4"
+                  }
+                },
+                {
+                  "id": "5",
+                  "label": {
+                    "en": "Preset 5"
+                  }
+                },
+                {
+                  "id": "6",
+                  "label": {
+                    "en": "Preset 6"
+                  }
+                }
+              ],
+              "hint": {
+                "en": "The physical Bose button that should start the configured stream."
+              }
+            },
+            {
+              "id": "preset1_name",
+              "type": "text",
+              "label": {
+                "en": "Name"
+              },
+              "value": "One World Radio",
+              "highlight": true
+            },
+            {
+              "id": "preset1_url",
+              "type": "text",
+              "label": {
+                "en": "Stream URL"
+              },
+              "value": "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
+              "highlight": true,
+              "hint": {
+                "en": "Used when the selected physical preset button is detected or the Flow action is run."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "discovery": {
+    "soundtouch-mdns": {
+      "type": "mdns-sd",
+      "mdns-sd": {
+        "name": "soundtouch",
+        "protocol": "tcp"
+      },
+      "id": "{{name}}"
+    }
+  }
+}

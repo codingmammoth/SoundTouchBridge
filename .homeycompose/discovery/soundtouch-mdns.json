@@ -1,0 +1,8 @@
+{
+  "type": "mdns-sd",
+  "mdns-sd": {
+    "name": "soundtouch",
+    "protocol": "tcp"
+  },
+  "id": "{{name}}"
+}

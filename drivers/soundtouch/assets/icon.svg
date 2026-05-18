@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SoundTouch speaker">
+  <rect x="10" y="8" width="44" height="48" rx="6" fill="#222"/>
+  <rect x="16" y="14" width="32" height="30" rx="3" fill="#3b3b3b"/>
+  <circle cx="32" cy="29" r="9" fill="none" stroke="#f2f2f2" stroke-width="3"/>
+  <circle cx="32" cy="29" r="3" fill="#f2f2f2"/>
+  <rect x="20" y="48" width="24" height="3" rx="1.5" fill="#f2f2f2"/>
+</svg>

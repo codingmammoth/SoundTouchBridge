@@ -1,0 +1,120 @@
+[
+  {
+    "type": "group",
+    "label": {
+      "en": "Connection"
+    },
+    "children": [
+      {
+        "id": "ip_address",
+        "type": "text",
+        "label": {
+          "en": "IP address"
+        },
+        "value": "",
+        "highlight": true,
+        "hint": {
+          "en": "Usually filled by discovery. You can edit it if the speaker changes address."
+        }
+      },
+      {
+        "id": "debug_enabled",
+        "type": "checkbox",
+        "label": {
+          "en": "Debug logging"
+        },
+        "value": true,
+        "hint": {
+          "en": "Log raw Bose WebSocket events while we identify preset payloads."
+        }
+      },
+      {
+        "id": "last_event",
+        "type": "label",
+        "label": {
+          "en": "Last WebSocket event"
+        },
+        "value": "None yet"
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": {
+      "en": "Preset bridge"
+    },
+    "children": [
+      {
+        "id": "preset1_button",
+        "type": "dropdown",
+        "label": {
+          "en": "Physical preset button"
+        },
+        "value": "1",
+        "highlight": true,
+        "values": [
+          {
+            "id": "1",
+            "label": {
+              "en": "Preset 1"
+            }
+          },
+          {
+            "id": "2",
+            "label": {
+              "en": "Preset 2"
+            }
+          },
+          {
+            "id": "3",
+            "label": {
+              "en": "Preset 3"
+            }
+          },
+          {
+            "id": "4",
+            "label": {
+              "en": "Preset 4"
+            }
+          },
+          {
+            "id": "5",
+            "label": {
+              "en": "Preset 5"
+            }
+          },
+          {
+            "id": "6",
+            "label": {
+              "en": "Preset 6"
+            }
+          }
+        ],
+        "hint": {
+          "en": "The physical Bose button that should start the configured stream."
+        }
+      },
+      {
+        "id": "preset1_name",
+        "type": "text",
+        "label": {
+          "en": "Name"
+        },
+        "value": "One World Radio",
+        "highlight": true
+      },
+      {
+        "id": "preset1_url",
+        "type": "text",
+        "label": {
+          "en": "Stream URL"
+        },
+        "value": "http://25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3",
+        "highlight": true,
+        "hint": {
+          "en": "Used when the selected physical preset button is detected or the Flow action is run."
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "triggers": [
+    {
+      "id": "preset_pressed",
+      "title": {
+        "en": "A preset button was pressed"
+      },
+      "tokens": [
+        {
+          "name": "preset",
+          "type": "number",
+          "title": {
+            "en": "Preset"
+          }
+        },
+        {
+          "name": "raw_event",
+          "type": "string",
+          "title": {
+            "en": "Raw event"
+          }
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "play_preset_1",
+      "title": {
+        "en": "Play configured preset 1"
+      }
+    },
+    {
+      "id": "play_stream",
+      "title": {
+        "en": "Play stream"
+      },
+      "titleFormatted": {
+        "en": "Play stream [[url]]"
+      },
+      "args": [
+        {
+          "name": "url",
+          "type": "text",
+          "title": {
+            "en": "Stream URL"
+          },
+          "placeholder": {
+            "en": "http://example.com/stream.mp3"
+          }
+        }
+      ]
+    }
+  ]
+}

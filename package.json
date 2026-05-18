@@ -1,0 +1,23 @@
+{
+  "name": "homeybose",
+  "version": "0.1.0",
+  "description": "Homey Pro bridge for Bose SoundTouch preset buttons and webstreams.",
+  "main": "app.js",
+  "scripts": {
+    "validate": "homey app validate",
+    "run": "homey app run",
+    "test": "node --check app.js && node --check drivers/soundtouch/driver.js && node --check drivers/soundtouch/device.js && node --check lib/soundtouch-client.js"
+  },
+  "dependencies": {
+    "homey": "^3.10.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "homey": "^3.10.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true,
+  "license": "MIT"
+}

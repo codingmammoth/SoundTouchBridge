@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
+  <path d="M250 180h460c55 0 100 45 100 100v400c0 55-45 100-100 100H250c-55 0-100-45-100-100V280c0-55 45-100 100-100z" fill="#222"/>
+  <path d="M276 260h408c30 0 56 25 56 56v220c0 31-26 56-56 56H276c-31 0-56-25-56-56V316c0-31 25-56 56-56z" fill="#3c3c3c"/>
+  <path d="M480 334a108 108 0 1 0 0 216 108 108 0 0 0 0-216zm0 58a50 50 0 1 1 0 100 50 50 0 0 1 0-100z" fill="#f2f2f2"/>
+  <path d="M330 666h300c18 0 32 14 32 32s-14 32-32 32H330c-18 0-32-14-32-32s14-32 32-32z" fill="#f2f2f2"/>
+  <path d="M730 192c70 54 114 139 114 234s-44 180-114 234" fill="none" stroke="#f2f2f2" stroke-width="34" stroke-linecap="round"/>
+  <path d="M785 122c90 76 147 190 147 304s-57 228-147 304" fill="none" stroke="#f2f2f2" stroke-width="24" stroke-linecap="round" opacity=".65"/>
+</svg>

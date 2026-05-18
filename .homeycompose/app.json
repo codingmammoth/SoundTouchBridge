@@ -1,0 +1,27 @@
+{
+  "id": "com.codingmammoth.homeybose",
+  "version": "0.1.0",
+  "compatibility": ">=5.0.0",
+  "runtime": "nodejs",
+  "platforms": ["local"],
+  "sdk": 3,
+  "brandColor": "#222222",
+  "name": {
+    "en": "SoundTouch Bridge"
+  },
+  "description": {
+    "en": "Local preset and stream bridge for Bose SoundTouch speakers."
+  },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "category": "music",
+  "tags": {
+    "en": ["bose", "soundtouch", "radio", "music", "upnp"]
+  },
+  "author": {
+    "name": "CodingMammoth"
+  }
+}

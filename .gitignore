@@ -1,0 +1,8 @@
+node_modules/
+env.json
+*.log
+.DS_Store
+
+
+# Added by Homey CLI
+/.homeybuild/
