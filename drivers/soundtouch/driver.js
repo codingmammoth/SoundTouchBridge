@@ -59,6 +59,9 @@ class SoundTouchDriver extends Homey.Driver {
     session.setHandler("disconnect", async () => {
       this.log("Pair session closed for SoundTouch driver");
     });
+
+    this.log("Showing custom list_devices pair view");
+    await session.showView("list_devices");
   }
 
   async onPairListDevices() {

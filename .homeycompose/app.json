@@ -1,6 +1,6 @@
 {
   "id": "com.codingmammoth.homeybose",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "compatibility": ">=5.0.0",
   "platforms": ["local"],
   "sdk": 3,
