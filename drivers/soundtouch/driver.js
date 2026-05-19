@@ -8,6 +8,7 @@ const {
 } = require("../../lib/soundtouch-client");
 
 const RADIO_DEVICE_ICON = "/icon.svg";
+const INFO_PREVIEW_LENGTH = 180;
 
 class SoundTouchDriver extends Homey.Driver {
   async onInit() {
@@ -25,13 +26,21 @@ class SoundTouchDriver extends Homey.Driver {
   }
 
   async onPairListDevices() {
-    const discovered = await this.getDiscoveredSpeakers();
-    if (discovered.length > 0) {
-      return discovered;
-    }
+    this.log("Pairing requested: listing SoundTouch speakers");
 
-    this.log("No SoundTouch speakers found through Homey discovery yet.");
-    return [];
+    try {
+      const discovered = await this.getDiscoveredSpeakers();
+      this.log(`Pairing discovery completed: ${discovered.length} speaker(s) available`);
+      if (discovered.length > 0) {
+        return discovered;
+      }
+
+      this.log("No SoundTouch speakers found through Homey discovery yet.");
+      return [];
+    } catch (error) {
+      this.error(`Pairing discovery failed: ${error.message}`);
+      throw error;
+    }
   }
 
   async getDiscoveredSpeakers() {
@@ -39,16 +48,22 @@ class SoundTouchDriver extends Homey.Driver {
     const results = Object.values(strategy.getDiscoveryResults());
     const speakers = [];
 
+    this.log(`Homey mDNS discovery returned ${results.length} raw result(s)`);
+
     for (const result of results) {
       const address = result.address;
+      this.log(`Discovery candidate: ${this.formatDiscoveryResult(result)}`);
       if (!address) {
+        this.log("Skipping discovery candidate without address");
         continue;
       }
 
       try {
+        this.log(`Checking SoundTouch /info at ${address}:8090`);
         const infoXml = await getInfo(address);
         const id = extractDeviceId(infoXml) || result.id || address;
         const name = extractName(infoXml) || result.name || `SoundTouch ${address}`;
+        this.log(`Accepted SoundTouch speaker: name="${name}" id="${id}" address="${address}" info="${this.previewXml(infoXml)}"`);
 
         speakers.push({
           name,
@@ -69,6 +84,28 @@ class SoundTouchDriver extends Homey.Driver {
     }
 
     return speakers;
+  }
+
+  formatDiscoveryResult(result) {
+    const parts = [
+      `id="${result.id || ""}"`,
+      `name="${result.name || ""}"`,
+      `address="${result.address || ""}"`,
+      `port="${result.port || ""}"`,
+    ];
+
+    if (result.txt) {
+      parts.push(`txt=${JSON.stringify(result.txt)}`);
+    }
+
+    return parts.join(" ");
+  }
+
+  previewXml(xml) {
+    return String(xml || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, INFO_PREVIEW_LENGTH);
   }
 
   async triggerPresetPressed(device, tokens) {
