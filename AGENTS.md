@@ -31,7 +31,7 @@ speaker's UPnP AVTransport endpoint.
   probing, and click counting.
 - `lib/soundtouch-client.js`: SoundTouch HTTP API, UPnP playback, XML helpers,
   preset-event parsing, and stream URL validation.
-- `drivers/soundtouch/driver.js`: discovery, pairing, random radio icon
+- `drivers/soundtouch/driver.js`: discovery, pairing, SoundTouch 10 icon
   assignment, Flow action/trigger registration.
 - `drivers/soundtouch/device.js`: device lifecycle, capabilities, WebSocket
   handling, active preset state, playback controls, settings sync.

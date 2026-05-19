@@ -116,11 +116,11 @@ The app tracks:
 - Wi-Fi signal summary when available
 - last raw WebSocket event when debug logging is enabled
 
-## Pairing Icons
+## Pairing Icon
 
-When a SoundTouch speaker is paired, the app assigns one of several radio-style
-icons. The icon choice is deterministic based on the speaker id, so it varies
-between speakers but remains stable for the same speaker.
+When a SoundTouch speaker is paired, the app assigns a simplified SoundTouch 10
+icon. The app card background image is abstract-only, so the Homey card does
+not show the same speaker artwork twice.
 
 ## Local Protocols
 

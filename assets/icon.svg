@@ -1,36 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
-  <rect x="92" y="298" width="776" height="372" rx="58" fill="#ffffff"/>
-  <path d="M120 314c26-24 56-36 92-36h536c36 0 66 12 92 36v44H120z" fill="#ffffff" opacity="0.82"/>
-  <path d="M150 640h660c-26 24-56 36-92 36H242c-36 0-66-12-92-36z" fill="#ffffff" opacity="0.82"/>
-
-  <rect x="376" y="326" width="208" height="268" rx="26" fill="#222222"/>
-  <rect x="406" y="352" width="148" height="70" rx="12" fill="#ffffff" opacity="0.9"/>
-  <circle cx="480" cy="462" r="16" fill="#ffffff" opacity="0.92"/>
-  <rect x="430" y="520" width="100" height="10" rx="5" fill="#ffffff" opacity="0.9"/>
-
-  <rect x="136" y="386" width="210" height="212" rx="10" fill="#222222" opacity="0.82"/>
-  <rect x="614" y="386" width="210" height="212" rx="10" fill="#222222" opacity="0.82"/>
-  <g fill="#ffffff" opacity="0.7">
-    <circle cx="178" cy="430" r="9"/>
-    <circle cx="228" cy="430" r="9"/>
-    <circle cx="278" cy="430" r="9"/>
-    <circle cx="666" cy="430" r="9"/>
-    <circle cx="716" cy="430" r="9"/>
-    <circle cx="766" cy="430" r="9"/>
-    <circle cx="178" cy="500" r="9"/>
-    <circle cx="228" cy="500" r="9"/>
-    <circle cx="278" cy="500" r="9"/>
-    <circle cx="666" cy="500" r="9"/>
-    <circle cx="716" cy="500" r="9"/>
-    <circle cx="766" cy="500" r="9"/>
-    <circle cx="178" cy="570" r="9"/>
-    <circle cx="228" cy="570" r="9"/>
-    <circle cx="278" cy="570" r="9"/>
-    <circle cx="666" cy="570" r="9"/>
-    <circle cx="716" cy="570" r="9"/>
-    <circle cx="766" cy="570" r="9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch 10 Bridge">
+  <path fill="#ffffff" fill-rule="evenodd" d="M286 82h388c42 0 76 34 76 76v644c0 42-34 76-76 76H286c-42 0-76-34-76-76V158c0-42 34-76 76-76Zm0 48c-16 0-28 12-28 28v644c0 16 12 28 28 28h388c16 0 28-12 28-28V158c0-16-12-28-28-28H286Z"/>
+  <path fill="#ffffff" d="M238 314h484v48H238z"/>
+  <path fill="#ffffff" opacity="0.9" d="M238 386h484v24H238z"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M352 176h256c22 0 40 18 40 40v14c0 22-18 40-40 40H352c-22 0-40-18-40-40v-14c0-22 18-40 40-40Zm0 34c-4 0-6 2-6 6v14c0 4 2 6 6 6h256c4 0 6-2 6-6v-14c0-4-2-6-6-6H352Z"/>
+  <circle cx="390" cy="223" r="16" fill="#ffffff"/>
+  <circle cx="480" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <circle cx="570" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
+  <g fill="#ffffff" opacity="0.74">
+    <circle cx="328" cy="494" r="12"/>
+    <circle cx="404" cy="494" r="12"/>
+    <circle cx="480" cy="494" r="12"/>
+    <circle cx="556" cy="494" r="12"/>
+    <circle cx="632" cy="494" r="12"/>
+    <circle cx="328" cy="570" r="12"/>
+    <circle cx="404" cy="570" r="12"/>
+    <circle cx="480" cy="570" r="12"/>
+    <circle cx="556" cy="570" r="12"/>
+    <circle cx="632" cy="570" r="12"/>
+    <circle cx="328" cy="646" r="12"/>
+    <circle cx="404" cy="646" r="12"/>
+    <circle cx="480" cy="646" r="12"/>
+    <circle cx="556" cy="646" r="12"/>
+    <circle cx="632" cy="646" r="12"/>
+    <circle cx="328" cy="722" r="12"/>
+    <circle cx="404" cy="722" r="12"/>
+    <circle cx="480" cy="722" r="12"/>
+    <circle cx="556" cy="722" r="12"/>
+    <circle cx="632" cy="722" r="12"/>
   </g>
-  <rect x="358" y="226" width="244" height="66" rx="12" fill="#ffffff"/>
-  <rect x="396" y="244" width="64" height="30" rx="8" fill="#222222"/>
-  <rect x="466" y="244" width="98" height="30" rx="8" fill="#222222" opacity="0.78"/>
 </svg>
