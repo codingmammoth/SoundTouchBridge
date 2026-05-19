@@ -102,6 +102,7 @@
 
     <script type="application/javascript">
       (function () {
+        var HomeyApi = null;
         var statusEl = document.getElementById("status");
         var listEl = document.getElementById("list");
         var retryButton = document.getElementById("retry");
@@ -114,24 +115,34 @@
         function emitWithTimeout(eventName, data, timeoutMs) {
           var timeoutPromise = new Promise(function (resolve) {
             setTimeout(function () {
+              logToDriver(eventName + " timed out in custom view after " + timeoutMs + "ms");
               resolve([]);
             }, timeoutMs);
           });
 
           return Promise.race([
-            Homey.emit(eventName, data || {}),
+            HomeyApi.emit(eventName, data || {}),
             timeoutPromise,
           ]);
+        }
+
+        function logToDriver(message) {
+          if (!HomeyApi) {
+            return;
+          }
+          HomeyApi.emit("pair_view_log", String(message || "")).catch(function () {});
         }
 
         function renderDevices(devices) {
           listEl.innerHTML = "";
 
           if (!devices || devices.length === 0) {
+            logToDriver("rendering empty speaker list");
             setStatus("No SoundTouch speakers found. Make sure Homey and the speaker are on the same network, then retry.");
             return;
           }
 
+          logToDriver("rendering " + devices.length + " speaker(s)");
           setStatus("Select a SoundTouch speaker.");
           devices.forEach(function (device) {
             var button = document.createElement("button");
@@ -152,14 +163,17 @@
           retryButton.disabled = true;
           listEl.innerHTML = "";
           setStatus("Looking for SoundTouch speakers...");
+          logToDriver("starting speaker search");
 
           emitWithTimeout("list_devices", {}, SEARCH_TIMEOUT_MS)
             .then(function (devices) {
+              logToDriver("list_devices returned " + (devices ? devices.length : 0) + " speaker(s)");
               renderDevices(devices);
             })
             .catch(function (error) {
+              logToDriver("list_devices failed: " + (error && error.message ? error.message : String(error)));
               setStatus("Could not search for speakers.");
-              Homey.alert(error && error.message ? error.message : String(error), "error");
+              HomeyApi.alert(error && error.message ? error.message : String(error), "error");
             })
             .then(function () {
               retryButton.disabled = false;
@@ -169,22 +183,28 @@
         function addDevice(device, button) {
           button.disabled = true;
           setStatus("Adding " + (device.name || "SoundTouch speaker") + "...");
+          logToDriver("creating device " + (device.name || ""));
 
-          Homey.createDevice(device)
+          HomeyApi.createDevice(device)
             .then(function () {
-              return Homey.done();
+              logToDriver("device created");
+              return HomeyApi.done();
             })
             .catch(function (error) {
+              logToDriver("createDevice failed: " + (error && error.message ? error.message : String(error)));
               button.disabled = false;
               setStatus("Could not add speaker.");
-              Homey.alert(error && error.message ? error.message : String(error), "error");
+              HomeyApi.alert(error && error.message ? error.message : String(error), "error");
             });
         }
 
         function onHomeyReady(HomeyReady) {
-          HomeyReady.setTitle("Add SoundTouch speaker");
+          HomeyApi = HomeyReady;
+          HomeyApi.setTitle("Add SoundTouch speaker");
           retryButton.addEventListener("click", searchDevices);
-          searchDevices();
+          HomeyApi.emit("pair_view_ready", {})
+            .catch(function () {})
+            .then(searchDevices);
         }
 
         window.onHomeyReady = onHomeyReady;
