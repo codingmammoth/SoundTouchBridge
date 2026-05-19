@@ -61,7 +61,7 @@
   "discovery": "soundtouch-mdns",
   "pair": [
     {
-      "id": "list_devices"
+      "id": "select_speaker"
     }
   ]
 }
