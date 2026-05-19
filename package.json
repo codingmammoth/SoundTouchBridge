@@ -1,6 +1,6 @@
 {
   "name": "homeybose",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Homey Pro bridge for Bose SoundTouch preset buttons and webstreams.",
   "main": "app.js",
   "scripts": {
