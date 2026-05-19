@@ -8,10 +8,6 @@ const {
 } = require("../../lib/soundtouch-client");
 
 const RADIO_DEVICE_ICON = "/icon.svg";
-const INFO_PREVIEW_LENGTH = 180;
-const STARTUP_DISCOVERY_LOG_DELAY_MS = 3000;
-const PAIRING_DISCOVERY_TIMEOUT_MS = 12000;
-const INFO_REQUEST_TIMEOUT_MS = 3000;
 
 class SoundTouchDriver extends Homey.Driver {
   async onInit() {
@@ -26,67 +22,16 @@ class SoundTouchDriver extends Homey.Driver {
     this.homey.flow.getActionCard("play_stream").registerRunListener(async ({ device, url }) => {
       await device.playStream(url);
     });
-
-    this.homey.setTimeout(() => {
-      this.logDiscoverySnapshot("startup delayed check").catch((error) => {
-        this.error(`Startup discovery snapshot failed: ${error.message}`);
-      });
-    }, STARTUP_DISCOVERY_LOG_DELAY_MS);
   }
 
   async onPairListDevices() {
-    this.log("onPairListDevices invoked");
-    return this.listPairingDevices();
-  }
-
-  async listPairingDevices() {
-    this.log("Pairing requested: listing SoundTouch speakers");
-
-    try {
-      const discovered = await this.withTimeout(
-        this.getDiscoveredSpeakers(),
-        PAIRING_DISCOVERY_TIMEOUT_MS,
-        "Pairing discovery timed out",
-      );
-      this.log(`Pairing discovery completed: ${discovered.length} speaker(s) available`);
-      if (discovered.length > 0) {
-        return discovered;
-      }
-
-      this.log("No SoundTouch speakers found through Homey discovery yet.");
-      return [];
-    } catch (error) {
-      this.error(`Pairing discovery failed: ${error.message}`);
-      throw error;
+    const discovered = await this.getDiscoveredSpeakers();
+    if (discovered.length > 0) {
+      return discovered;
     }
-  }
 
-  async withTimeout(promise, timeoutMs, timeoutMessage) {
-    let timeout = null;
-    try {
-      return await Promise.race([
-        promise,
-        new Promise((resolve) => {
-          timeout = this.homey.setTimeout(() => {
-            this.error(`${timeoutMessage} after ${timeoutMs}ms`);
-            resolve([]);
-          }, timeoutMs);
-        }),
-      ]);
-    } finally {
-      if (timeout) {
-        this.homey.clearTimeout(timeout);
-      }
-    }
-  }
-
-  async logDiscoverySnapshot(reason) {
-    const strategy = this.getDiscoveryStrategy();
-    const results = Object.values(strategy.getDiscoveryResults());
-    this.log(`Discovery snapshot (${reason}): ${results.length} raw result(s)`);
-    results.forEach((result) => {
-      this.log(`Snapshot candidate: ${this.formatDiscoveryResult(result)}`);
-    });
+    this.log("No SoundTouch speakers found through Homey discovery yet.");
+    return [];
   }
 
   async getDiscoveredSpeakers() {
@@ -94,22 +39,16 @@ class SoundTouchDriver extends Homey.Driver {
     const results = Object.values(strategy.getDiscoveryResults());
     const speakers = [];
 
-    this.log(`Homey mDNS discovery returned ${results.length} raw result(s)`);
-
     for (const result of results) {
       const address = result.address;
-      this.log(`Discovery candidate: ${this.formatDiscoveryResult(result)}`);
       if (!address) {
-        this.log("Skipping discovery candidate without address");
         continue;
       }
 
       try {
-        this.log(`Checking SoundTouch /info at ${address}:8090`);
-        const infoXml = await getInfo(address, INFO_REQUEST_TIMEOUT_MS);
+        const infoXml = await getInfo(address);
         const id = extractDeviceId(infoXml) || result.id || address;
         const name = extractName(infoXml) || result.name || `SoundTouch ${address}`;
-        this.log(`Accepted SoundTouch speaker: name="${name}" id="${id}" address="${address}" info="${this.previewXml(infoXml)}"`);
 
         speakers.push({
           name,
@@ -130,28 +69,6 @@ class SoundTouchDriver extends Homey.Driver {
     }
 
     return speakers;
-  }
-
-  formatDiscoveryResult(result) {
-    const parts = [
-      `id="${result.id || ""}"`,
-      `name="${result.name || ""}"`,
-      `address="${result.address || ""}"`,
-      `port="${result.port || ""}"`,
-    ];
-
-    if (result.txt) {
-      parts.push(`txt=${JSON.stringify(result.txt)}`);
-    }
-
-    return parts.join(" ");
-  }
-
-  previewXml(xml) {
-    return String(xml || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, INFO_PREVIEW_LENGTH);
   }
 
   async triggerPresetPressed(device, tokens) {
