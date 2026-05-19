@@ -7,8 +7,6 @@ const {
   getInfo,
 } = require("../../lib/soundtouch-client");
 
-const RADIO_DEVICE_ICON = "/icon.svg";
-
 class SoundTouchDriver extends Homey.Driver {
   async onInit() {
     this.log("SoundTouch driver initialized");
@@ -53,11 +51,9 @@ class SoundTouchDriver extends Homey.Driver {
         speakers.push({
           name,
           data: { id },
-          icon: RADIO_DEVICE_ICON,
           store: {
             address,
             discoveryId: result.id,
-            icon: RADIO_DEVICE_ICON,
           },
           settings: {
             ip_address: address,

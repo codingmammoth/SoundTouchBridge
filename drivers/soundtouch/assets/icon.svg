@@ -1,11 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="132" y="44" width="248" height="424" rx="42" stroke-width="26"/>
-    <rect x="184" y="92" width="144" height="54" rx="24" stroke-width="20"/>
-    <path d="M162 178h188" stroke-width="20"/>
-    <path d="M162 220h188" stroke-width="12"/>
-    <path d="M194 282h124" stroke-width="18" stroke-dasharray="1 40"/>
-    <path d="M194 342h124" stroke-width="18" stroke-dasharray="1 40"/>
-    <path d="M194 402h124" stroke-width="18" stroke-dasharray="1 40"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch speaker">
+  <g fill="none" stroke="#222222" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="260" y="112" width="440" height="736" rx="48" stroke-width="42"/>
+    <rect x="344" y="194" width="272" height="60" rx="26" stroke-width="28"/>
+    <path d="M304 336h352" stroke-width="32"/>
+    <path d="M320 404h320" stroke="#777777" stroke-width="20"/>
+  </g>
+  <g fill="#222222">
+    <circle cx="390" cy="224" r="13"/>
+    <circle cx="480" cy="224" r="10"/>
+    <circle cx="570" cy="224" r="10"/>
+  </g>
+  <g fill="#777777">
+    <circle cx="344" cy="512" r="14"/>
+    <circle cx="432" cy="512" r="14"/>
+    <circle cx="520" cy="512" r="14"/>
+    <circle cx="608" cy="512" r="14"/>
+    <circle cx="344" cy="606" r="14"/>
+    <circle cx="432" cy="606" r="14"/>
+    <circle cx="520" cy="606" r="14"/>
+    <circle cx="608" cy="606" r="14"/>
+    <circle cx="344" cy="700" r="14"/>
+    <circle cx="432" cy="700" r="14"/>
+    <circle cx="520" cy="700" r="14"/>
+    <circle cx="608" cy="700" r="14"/>
   </g>
 </svg>
