@@ -25,7 +25,29 @@ class SoundTouchDriver extends Homey.Driver {
     });
   }
 
+  async onPair(session) {
+    this.log("Pair session opened for SoundTouch driver");
+
+    session.setHandler("showView", async (viewId) => {
+      this.log(`Pair view shown: ${viewId}`);
+    });
+
+    session.setHandler("list_devices", async () => {
+      this.log("Pair list_devices handler invoked");
+      return this.listPairingDevices();
+    });
+
+    session.setHandler("disconnect", async () => {
+      this.log("Pair session closed for SoundTouch driver");
+    });
+  }
+
   async onPairListDevices() {
+    this.log("onPairListDevices invoked");
+    return this.listPairingDevices();
+  }
+
+  async listPairingDevices() {
     this.log("Pairing requested: listing SoundTouch speakers");
 
     try {
