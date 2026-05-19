@@ -9,6 +9,9 @@ const {
 
 const RADIO_DEVICE_ICON = "/icon.svg";
 const INFO_PREVIEW_LENGTH = 180;
+const STARTUP_DISCOVERY_LOG_DELAY_MS = 3000;
+const PAIRING_DISCOVERY_TIMEOUT_MS = 12000;
+const INFO_REQUEST_TIMEOUT_MS = 3000;
 
 class SoundTouchDriver extends Homey.Driver {
   async onInit() {
@@ -23,6 +26,12 @@ class SoundTouchDriver extends Homey.Driver {
     this.homey.flow.getActionCard("play_stream").registerRunListener(async ({ device, url }) => {
       await device.playStream(url);
     });
+
+    this.homey.setTimeout(() => {
+      this.logDiscoverySnapshot("startup delayed check").catch((error) => {
+        this.error(`Startup discovery snapshot failed: ${error.message}`);
+      });
+    }, STARTUP_DISCOVERY_LOG_DELAY_MS);
   }
 
   async onPair(session) {
@@ -51,7 +60,11 @@ class SoundTouchDriver extends Homey.Driver {
     this.log("Pairing requested: listing SoundTouch speakers");
 
     try {
-      const discovered = await this.getDiscoveredSpeakers();
+      const discovered = await this.withTimeout(
+        this.getDiscoveredSpeakers(),
+        PAIRING_DISCOVERY_TIMEOUT_MS,
+        "Pairing discovery timed out",
+      );
       this.log(`Pairing discovery completed: ${discovered.length} speaker(s) available`);
       if (discovered.length > 0) {
         return discovered;
@@ -63,6 +76,34 @@ class SoundTouchDriver extends Homey.Driver {
       this.error(`Pairing discovery failed: ${error.message}`);
       throw error;
     }
+  }
+
+  async withTimeout(promise, timeoutMs, timeoutMessage) {
+    let timeout = null;
+    try {
+      return await Promise.race([
+        promise,
+        new Promise((resolve) => {
+          timeout = this.homey.setTimeout(() => {
+            this.error(`${timeoutMessage} after ${timeoutMs}ms`);
+            resolve([]);
+          }, timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timeout) {
+        this.homey.clearTimeout(timeout);
+      }
+    }
+  }
+
+  async logDiscoverySnapshot(reason) {
+    const strategy = this.getDiscoveryStrategy();
+    const results = Object.values(strategy.getDiscoveryResults());
+    this.log(`Discovery snapshot (${reason}): ${results.length} raw result(s)`);
+    results.forEach((result) => {
+      this.log(`Snapshot candidate: ${this.formatDiscoveryResult(result)}`);
+    });
   }
 
   async getDiscoveredSpeakers() {
@@ -82,7 +123,7 @@ class SoundTouchDriver extends Homey.Driver {
 
       try {
         this.log(`Checking SoundTouch /info at ${address}:8090`);
-        const infoXml = await getInfo(address);
+        const infoXml = await getInfo(address, INFO_REQUEST_TIMEOUT_MS);
         const id = extractDeviceId(infoXml) || result.id || address;
         const name = extractName(infoXml) || result.name || `SoundTouch ${address}`;
         this.log(`Accepted SoundTouch speaker: name="${name}" id="${id}" address="${address}" info="${this.previewXml(infoXml)}"`);
