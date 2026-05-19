@@ -191,6 +191,7 @@
         "preset_5",
         "preset_6",
         "stop_playback",
+        "speaker_playing",
         "onoff",
         "volume_set"
       ],

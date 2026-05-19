@@ -29,6 +29,7 @@ const ORDERED_CAPABILITIES = [
   "preset_5",
   "preset_6",
   "stop_playback",
+  "speaker_playing",
   "onoff",
   "volume_set",
 ];
@@ -372,6 +373,14 @@ class SoundTouchDevice extends Homey.Device {
       await this.stop();
     });
 
+    this.registerCapabilityListener("speaker_playing", async (value) => {
+      if (value) {
+        await this.turnOn();
+      } else {
+        await this.stop();
+      }
+    });
+
     for (let preset = 1; preset <= 6; preset += 1) {
       this.registerCapabilityListener(`preset_${preset}`, async () => {
         await this.playConfiguredPreset(preset);
@@ -405,6 +414,7 @@ class SoundTouchDevice extends Homey.Device {
       await this.updateNowPlayingStatus(status);
       await this.updateActivePresetFromStatus(status);
       await this.setCapabilityValueIfAvailable("onoff", !status.isStandby);
+      await this.setCapabilityValueIfAvailable("speaker_playing", status.isPlaying);
       if (volume !== null) {
         await this.setCapabilityValueIfAvailable("volume_set", volume / 100);
       }
@@ -527,6 +537,7 @@ class SoundTouchDevice extends Homey.Device {
       await this.updateNowPlayingStatus(nowPlayingStatus);
       await this.updateActivePresetFromStatus(nowPlayingStatus);
       await this.setCapabilityValueIfAvailable("onoff", !nowPlayingStatus.isStandby);
+      await this.setCapabilityValueIfAvailable("speaker_playing", nowPlayingStatus.isPlaying);
     }
   }
 
@@ -609,6 +620,7 @@ class SoundTouchDevice extends Homey.Device {
     this.log(`Putting ${this.address} in standby`);
     await standby(this.address);
     await this.setCapabilityValueIfAvailable("onoff", false);
+    await this.setCapabilityValueIfAvailable("speaker_playing", false);
     await this.setActivePreset(null);
   }
 
@@ -619,6 +631,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.log(`Stopping playback on ${this.address}`);
     await stopPlayback(this.address);
+    await this.setCapabilityValueIfAvailable("speaker_playing", false);
     await this.setActivePreset(null);
   }
 
@@ -639,6 +652,7 @@ class SoundTouchDevice extends Homey.Device {
     this.log(`Playing stream on ${this.address}: ${url}`);
     await playStream(this.address, url, { volume });
     await this.setCapabilityValueIfAvailable("onoff", true);
+    await this.setCapabilityValueIfAvailable("speaker_playing", true);
     const activePreset = presetNumber || this.findPresetByUrl(url);
     await this.setActivePreset(activePreset);
 
