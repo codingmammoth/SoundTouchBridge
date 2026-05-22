@@ -8,6 +8,8 @@ const {
   extractNowPlayingStatus,
   extractPresetNumber,
   getNowPlaying,
+  getPositionInfo,
+  getTransportInfo,
   getVolume,
   playStream,
   selectLastSource,
@@ -21,6 +23,11 @@ const WEBSOCKET_PORT = 8080;
 const WEBSOCKET_PROTOCOL = "gabbo";
 const RECONNECT_DELAY_MS = 10000;
 const PRESET_DEBOUNCE_MS = 1500;
+const PLAYBACK_VERIFY_TIMEOUT_MS = 12000;
+const PLAYBACK_VERIFY_INTERVAL_MS = 1500;
+const PRE_PLAY_WAKE_DELAY_MS = 1200;
+const RECOVERY_SETTLE_MS = 1500;
+const SETTING_TEXT_MAX_LENGTH = 900;
 const ORDERED_CAPABILITIES = [
   "preset_1",
   "preset_2",
@@ -82,6 +89,7 @@ class SoundTouchDevice extends Homey.Device {
     this.wifiSignal = null;
     this.currentSource = null;
     this.nowPlaying = null;
+    this.playbackQueue = Promise.resolve();
     this.log("SoundTouch device initialized");
 
     await this.refreshAddressFromSettings();
@@ -102,11 +110,14 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings, changedKeys }) {
+    this.validatePresetUrlSettings(newSettings, changedKeys);
+
     if (changedKeys.includes("ip_address")) {
       const nextAddress = String(newSettings.ip_address || "").trim();
       if (!nextAddress) {
         throw new Error("IP address is required.");
       }
+      await this.recordAction(`IP address changed to ${nextAddress}`);
       this.address = nextAddress;
       this.closeWebSocket();
       this.connectWebSocket();
@@ -229,6 +240,10 @@ class SoundTouchDevice extends Homey.Device {
     const settings = this.getSettings();
     const updates = {
       last_event: "Enable debug logging to capture raw events.",
+      websocket_status: "Unknown",
+      last_websocket_activity: "None",
+      last_action: "None",
+      last_playback_error: "None",
     };
     if (settings.debug_enabled === true) {
       updates.debug_enabled = false;
@@ -318,6 +333,10 @@ class SoundTouchDevice extends Homey.Device {
     return configuredName ? `${preset}. ${configuredName}` : `Preset ${preset}`;
   }
 
+  getPresetName(preset, settings = this.getSettings()) {
+    return String(settings[`preset${preset}_name`] || "").trim() || `Preset ${preset}`;
+  }
+
   async setActivePreset(preset, settings = this.getSettings()) {
     const nextPreset = Number.isInteger(preset) && preset >= 1 && preset <= 6 ? preset : null;
     if (this.activePreset === nextPreset) {
@@ -383,7 +402,7 @@ class SoundTouchDevice extends Homey.Device {
 
     for (let preset = 1; preset <= 6; preset += 1) {
       this.registerCapabilityListener(`preset_${preset}`, async () => {
-        await this.playConfiguredPreset(preset);
+        await this.playConfiguredPreset(preset, { source: "Homey device control" });
       });
     }
   }
@@ -392,6 +411,64 @@ class SoundTouchDevice extends Homey.Device {
     if (this.hasCapability(capability)) {
       await this.setCapabilityValue(capability, value);
     }
+  }
+
+  formatDiagnostic(message) {
+    const timestamp = new Date().toISOString();
+    return `${timestamp} - ${String(message || "").slice(0, SETTING_TEXT_MAX_LENGTH - timestamp.length - 3)}`;
+  }
+
+  async setDiagnosticSetting(key, message) {
+    try {
+      await this.setSettings({
+        [key]: this.formatDiagnostic(message),
+      });
+    } catch (error) {
+      this.log(`Could not update diagnostic setting ${key}: ${error.message}`);
+    }
+  }
+
+  async recordAction(message) {
+    this.log(message);
+    await this.setDiagnosticSetting("last_action", message);
+  }
+
+  async recordPlaybackError(message, { warning = true } = {}) {
+    const text = String(message || "Unknown playback error");
+    this.error(text);
+    await this.setDiagnosticSetting("last_playback_error", text);
+    if (warning && typeof this.setWarning === "function") {
+      try {
+        await this.setWarning(text.slice(0, 250));
+      } catch (error) {
+        this.log(`Could not set warning: ${error.message}`);
+      }
+    }
+  }
+
+  async clearPlaybackError() {
+    await this.setSettings({ last_playback_error: "None" });
+    if (typeof this.unsetWarning === "function") {
+      try {
+        await this.unsetWarning();
+      } catch (error) {
+        this.log(`Could not clear warning: ${error.message}`);
+      }
+    }
+  }
+
+  async updateWebSocketStatus(message) {
+    await this.setDiagnosticSetting("websocket_status", message);
+  }
+
+  async recordWebSocketActivity(message) {
+    await this.setDiagnosticSetting("last_websocket_activity", String(message || "").slice(0, 420));
+  }
+
+  delay(ms) {
+    return new Promise((resolve) => {
+      this.homey.setTimeout(resolve, ms);
+    });
   }
 
   async syncPresetCapabilitySelection() {
@@ -437,6 +514,7 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("open", async () => {
       this.log("Bose WebSocket connected");
+      await this.updateWebSocketStatus(`Connected to ${this.address}:${WEBSOCKET_PORT}`);
       await this.setAvailable();
     });
 
@@ -448,6 +526,9 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("close", () => {
       this.log("Bose WebSocket closed");
+      this.updateWebSocketStatus("Closed; reconnecting").catch((error) => {
+        this.error(`Failed to update WebSocket status: ${error.message}`);
+      });
       this.setUnavailable("Speaker connection lost. Reconnecting...").catch((error) => {
         this.error(`Failed to mark speaker unavailable: ${error.message}`);
       });
@@ -456,9 +537,19 @@ class SoundTouchDevice extends Homey.Device {
 
     this.ws.on("error", (error) => {
       this.error(`Bose WebSocket error: ${error.message}`);
+      this.updateWebSocketStatus(`Error: ${error.message}`).catch((statusError) => {
+        this.error(`Failed to update WebSocket status: ${statusError.message}`);
+      });
       this.setUnavailable(`Speaker connection error: ${error.message}`).catch((availabilityError) => {
         this.error(`Failed to mark speaker unavailable: ${availabilityError.message}`);
       });
+      if (this.ws) {
+        try {
+          this.ws.terminate();
+        } catch (terminateError) {
+          this.error(`Failed to terminate Bose WebSocket: ${terminateError.message}`);
+        }
+      }
     });
   }
 
@@ -497,6 +588,7 @@ class SoundTouchDevice extends Homey.Device {
 
   async handleWebSocketMessage(message) {
     const rawEvent = compactXml(message.toString());
+    await this.recordWebSocketActivity(rawEvent.slice(0, 180));
     const settings = this.getSettings();
     if (settings.debug_enabled) {
       this.log(`Bose WebSocket event: ${rawEvent}`);
@@ -515,8 +607,9 @@ class SoundTouchDevice extends Homey.Device {
     }
 
     this.log(`Detected preset ${preset}`);
+    await this.recordAction(`Physical preset ${preset} pressed`);
     await this.driver.triggerPresetPressed(this, { preset, raw_event: rawEvent });
-    await this.playConfiguredPreset(preset);
+    await this.playConfiguredPreset(preset, { source: "physical preset" });
   }
 
   isDebounced(preset) {
@@ -586,7 +679,7 @@ class SoundTouchDevice extends Homey.Device {
     return parts.length ? parts.join(" | ") : "Unknown";
   }
 
-  async playConfiguredPreset(preset) {
+  async playConfiguredPreset(preset, { source = "Homey" } = {}) {
     const presetNumber = Number(preset && preset.id != null ? preset.id : preset);
     if (!Number.isInteger(presetNumber) || presetNumber < 1 || presetNumber > 6) {
       throw new Error(`Preset ${preset} is not valid.`);
@@ -595,11 +688,16 @@ class SoundTouchDevice extends Homey.Device {
     const settings = this.getSettings();
     const url = String(settings[`preset${presetNumber}_url`] || "").trim();
     if (!url) {
-      this.log(`Preset ${presetNumber} has no stream URL configured.`);
+      await this.recordPlaybackError(`Preset ${presetNumber} has no stream URL configured.`, { warning: false });
       return;
     }
 
-    await this.playStream(url, { presetNumber });
+    await this.recordAction(`Playing preset ${presetNumber} from ${source}: ${url}`);
+    await this.playStream(url, {
+      presetNumber,
+      source,
+      title: this.getPresetName(presetNumber, settings),
+    });
   }
 
   async turnOn() {
@@ -644,28 +742,173 @@ class SoundTouchDevice extends Homey.Device {
     await this.setCapabilityValueIfAvailable("volume_set", value);
   }
 
-  async playStream(url, { volume, presetNumber = null } = {}) {
+  async playStream(url, {
+    volume,
+    presetNumber = null,
+    source = "Homey",
+    title = "Internet Radio",
+    albumArtUrl = "",
+  } = {}) {
     if (!this.address) {
       throw new Error("No speaker IP address configured.");
     }
 
-    this.log(`Playing stream on ${this.address}: ${url}`);
-    await playStream(this.address, url, { volume });
-    await this.setCapabilityValueIfAvailable("onoff", true);
-    await this.setCapabilityValueIfAvailable("speaker_playing", true);
-    const activePreset = presetNumber || this.findPresetByUrl(url);
-    await this.setActivePreset(activePreset);
+    const playback = this.playbackQueue
+      .catch(() => null)
+      .then(() => this.playStreamExclusive(url, {
+        volume,
+        presetNumber,
+        source,
+        title,
+        albumArtUrl,
+      }));
+    this.playbackQueue = playback;
+    return playback;
+  }
+
+  async playStreamExclusive(url, {
+    volume,
+    presetNumber = null,
+    source = "Homey",
+    title = "Internet Radio",
+    albumArtUrl = "",
+  } = {}) {
+    try {
+      await this.clearPlaybackError();
+      await this.recordAction(`Starting stream from ${source} on ${this.address}: ${url}`);
+      await this.prepareSpeakerForPlayback();
+      const status = await this.playStreamWithFallback(url, {
+        volume,
+        title,
+        albumArtUrl,
+        presetNumber,
+      });
+      await this.setCapabilityValueIfAvailable("speaker_playing", status.isPlaying);
+      await this.recordAction(`Playback verified: ${status.source || "unknown source"} / ${status.rawPlayStatus || "unknown state"}`);
+      await this.setAvailable();
+    } catch (error) {
+      await this.setCapabilityValueIfAvailable("speaker_playing", false);
+      const detailedMessage = error.details || error.message;
+      await this.recordPlaybackError(`Could not play stream: ${detailedMessage}`);
+      throw new Error("Bose did not start playback. If this repeats, reboot the speaker and check Last playback error.");
+    }
+  }
+
+  async prepareSpeakerForPlayback() {
+    try {
+      await this.recordAction("Preparing speaker for UPnP playback");
+      await selectLastSource(this.address);
+      await this.delay(PRE_PLAY_WAKE_DELAY_MS);
+    } catch (error) {
+      await this.recordAction(`Preparing speaker ignored: ${error.message}`);
+    }
+  }
+
+  async playStreamWithFallback(url, { volume, title, albumArtUrl, presetNumber }) {
+    const attempts = [
+      { metadataMode: "didl", label: "with metadata", recovery: false },
+      { metadataMode: "empty", label: "without metadata", recovery: false },
+      { metadataMode: "empty", label: "after soft recovery", recovery: true },
+    ];
+    const errors = [];
+
+    for (const attempt of attempts) {
+      try {
+        if (attempt.recovery) {
+          await this.recoverUpnpRenderer();
+        }
+        await this.recordAction(`Trying playback ${attempt.label}: ${url}`);
+        await playStream(this.address, url, {
+          volume,
+          title,
+          albumArtUrl,
+          metadataMode: attempt.metadataMode,
+          onStep: async (step) => {
+            await this.recordAction(`Playback ${attempt.label} step ${step} for ${url}`);
+          },
+        });
+
+        await this.setCapabilityValueIfAvailable("onoff", true);
+        const activePreset = presetNumber || this.findPresetByUrl(url);
+        await this.setActivePreset(activePreset);
+        return await this.verifyPlaybackStarted(url);
+      } catch (error) {
+        const detailedMessage = error.details || error.message;
+        errors.push(`${attempt.label}: ${detailedMessage}`);
+        await this.recordAction(`Playback ${attempt.label} failed; ${attempt.metadataMode === "didl" ? "retrying without metadata" : "no fallback left"}`);
+      }
+    }
+
+    const error = new Error("Bose UPnP renderer appears stuck.");
+    error.details = errors.join(" | ");
+    throw error;
+  }
+
+  async recoverUpnpRenderer() {
+    await this.recordAction("Recovering Bose UPnP renderer");
+    try {
+      await stopPlayback(this.address);
+    } catch (error) {
+      await this.recordAction(`Recovery stop ignored: ${error.message}`);
+    }
+    await this.delay(RECOVERY_SETTLE_MS);
 
     try {
+      await standby(this.address);
+      await this.delay(RECOVERY_SETTLE_MS);
+    } catch (error) {
+      await this.recordAction(`Recovery standby ignored: ${error.message}`);
+    }
+
+    await this.prepareSpeakerForPlayback();
+  }
+
+  async verifyPlaybackStarted(expectedUrl) {
+    const startedAt = Date.now();
+    let lastNowPlaying = "";
+    let lastStatus = null;
+    let sawRequestedUri = false;
+
+    while (Date.now() - startedAt < PLAYBACK_VERIFY_TIMEOUT_MS) {
+      await this.delay(PLAYBACK_VERIFY_INTERVAL_MS);
       const nowPlaying = await getNowPlaying(this.address);
       const status = extractNowPlayingStatus(nowPlaying);
+      lastNowPlaying = compactXml(nowPlaying);
+      lastStatus = status;
+      sawRequestedUri = sawRequestedUri || lastNowPlaying.includes(expectedUrl);
       await this.updateNowPlayingStatus(status);
       await this.updateActivePresetFromStatus(status);
-      this.log(`Now playing: ${compactXml(nowPlaying)}`);
-    } catch (error) {
-      this.log(`Could not verify now playing after starting stream: ${error.message}`);
+      await this.recordAction(`Playback verify: ${status.source || "unknown source"} / ${status.rawPlayStatus || "unknown state"}`);
+      this.log(`Now playing after playback request: ${lastNowPlaying}`);
+
+      if (status.isPlaying) {
+        return status;
+      }
     }
-    await this.setAvailable();
+
+    const error = new Error("Bose UPnP renderer appears stuck.");
+    const transportDetails = await this.getTransportDiagnostics();
+    error.details = [
+      `Bose did not enter PLAY_STATE after starting ${expectedUrl}.`,
+      `Saw requested URI: ${sawRequestedUri ? "yes" : "no"}.`,
+      `Last source: ${(lastStatus && lastStatus.source) || "unknown"}.`,
+      `Last play status: ${(lastStatus && lastStatus.rawPlayStatus) || "unknown"}.`,
+      transportDetails,
+      `Last now playing: ${lastNowPlaying || "none"}`,
+    ].join(" ");
+    throw error;
+  }
+
+  async getTransportDiagnostics() {
+    try {
+      const [transportInfo, positionInfo] = await Promise.all([
+        getTransportInfo(this.address),
+        getPositionInfo(this.address),
+      ]);
+      return `UPnP transport: ${compactXml(transportInfo)} Position: ${compactXml(positionInfo)}.`;
+    } catch (error) {
+      return `UPnP diagnostics failed: ${error.message}.`;
+    }
   }
 }
 

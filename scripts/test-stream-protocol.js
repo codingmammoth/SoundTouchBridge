@@ -4,6 +4,8 @@ const http = require("http");
 
 const SOUNDTOUCH_PORT = 8090;
 const UPNP_PORT = 8091;
+const UPNP_STOP_SETTLE_MS = 400;
+const UPNP_SET_URI_SETTLE_MS = 500;
 const OWR_STREAM_PATH = "25503.live.streamtheworld.com/OWR_INTERNATIONAL.mp3";
 const DEFAULT_TESTS = [
   {
@@ -87,6 +89,31 @@ function extractTagValue(xml, tagName) {
   return match ? decodeXml(match[1]).trim() : null;
 }
 
+function guessAudioMimeType(streamUrl) {
+  const pathname = new URL(streamUrl).pathname.toLowerCase();
+  if (pathname.endsWith(".aac")) {
+    return "audio/aac";
+  }
+  if (pathname.endsWith(".m4a")) {
+    return "audio/mp4";
+  }
+  return "audio/mpeg";
+}
+
+function buildDidlLiteMetadata(streamUrl, title = "Internet Radio") {
+  return [
+    '<DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" ',
+    'xmlns:dc="http://purl.org/dc/elements/1.1/" ',
+    'xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/">',
+    '<item id="0" parentID="-1" restricted="false">',
+    `<dc:title>${escapeXml(title)}</dc:title>`,
+    "<upnp:class>object.item.audioItem.audioBroadcast</upnp:class>",
+    `<res protocolInfo="http-get:*:${guessAudioMimeType(streamUrl)}:*">${escapeXml(streamUrl)}</res>`,
+    "</item>",
+    "</DIDL-Lite>",
+  ].join("");
+}
+
 function request({
   host,
   port,
@@ -105,6 +132,7 @@ function request({
         method,
         headers: {
           Connection: "close",
+          ...(body ? { "Content-Length": Buffer.byteLength(body) } : {}),
           ...headers,
         },
         timeout,
@@ -181,14 +209,28 @@ function wait(ms) {
 }
 
 async function playStreamRaw(host, streamUrl) {
+  const stopBody = [
+    '<u:Stop xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">',
+    "<InstanceID>0</InstanceID>",
+    "</u:Stop>",
+  ].join("");
+  try {
+    await requestUpnp(host, "Stop", stopBody);
+    await wait(UPNP_STOP_SETTLE_MS);
+  } catch (error) {
+    // Best-effort cleanup; some speakers reject Stop when no transport is active.
+  }
+
+  const metadata = buildDidlLiteMetadata(streamUrl);
   const setUriBody = [
     '<u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">',
     "<InstanceID>0</InstanceID>",
     `<CurrentURI>${escapeXml(streamUrl)}</CurrentURI>`,
-    "<CurrentURIMetaData></CurrentURIMetaData>",
+    `<CurrentURIMetaData>${escapeXml(metadata)}</CurrentURIMetaData>`,
     "</u:SetAVTransportURI>",
   ].join("");
   await requestUpnp(host, "SetAVTransportURI", setUriBody);
+  await wait(UPNP_SET_URI_SETTLE_MS);
 
   const playBody = [
     '<u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">',

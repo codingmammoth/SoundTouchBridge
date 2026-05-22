@@ -96,6 +96,38 @@
           "en": "Status"
         },
         "value": "Unknown"
+      },
+      {
+        "id": "websocket_status",
+        "type": "label",
+        "label": {
+          "en": "WebSocket"
+        },
+        "value": "Unknown"
+      },
+      {
+        "id": "last_websocket_activity",
+        "type": "label",
+        "label": {
+          "en": "Last WebSocket activity"
+        },
+        "value": "None"
+      },
+      {
+        "id": "last_action",
+        "type": "label",
+        "label": {
+          "en": "Last action"
+        },
+        "value": "None"
+      },
+      {
+        "id": "last_playback_error",
+        "type": "label",
+        "label": {
+          "en": "Last playback error"
+        },
+        "value": "None"
       }
     ]
   },
