@@ -13,6 +13,7 @@ directly on the speaker.
 - Keep a SoundTouch WebSocket connection open for speaker events.
 - Detect physical preset button presses.
 - Map preset slots 1 through 6 to configured radio streams.
+- Sync native SoundTouch preset labels for the configured slots.
 - Start playback through UPnP AVTransport.
 - Keep working without Home Assistant, a computer, or a phone online.
 
@@ -93,6 +94,14 @@ The app provides:
 - Action: play a configured preset
 - Action: play a direct stream URL
 
+## Native Preset Labels
+
+The app syncs each configured Homey preset to the matching native SoundTouch
+preset slot through `POST /storePreset`. It stores safe `LOCAL_INTERNET_RADIO`
+items with Bose descriptor URLs, not `source="UPNP"` items. This keeps the
+speaker display aligned with the Homey preset name while Homey remains
+responsible for reliable UPnP playback.
+
 ## Default Presets
 
 New devices are seeded with direct plain-HTTP streams:
@@ -132,6 +141,6 @@ not show the same speaker artwork twice.
 
 - Replace the Bose cloud.
 - Modify speaker firmware.
-- Store UPnP streams as native Bose presets.
+- Store `source="UPNP"` streams as native Bose presets.
 - Depend on Home Assistant.
 - Require a desktop computer or phone to remain online.

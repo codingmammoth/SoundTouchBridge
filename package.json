@@ -3,6 +3,14 @@
   "version": "0.1.12",
   "description": "Homey Pro bridge for Bose SoundTouch preset buttons and webstreams.",
   "main": "app.js",
+  "homepage": "https://github.com/codingmammoth/SoundTouchBridge#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/codingmammoth/SoundTouchBridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/codingmammoth/SoundTouchBridge/issues"
+  },
   "scripts": {
     "validate": "homey app validate",
     "run": "homey app run",

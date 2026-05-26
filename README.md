@@ -16,7 +16,7 @@ online. Homey Pro acts as the always-on local bridge.
 
 ## Current Status
 
-Planning and first implementation.
+Development build, preparing for Homey beta publishing.
 
 Validated manually against a Bose SoundTouch 20:
 
@@ -26,6 +26,10 @@ Validated manually against a Bose SoundTouch 20:
 - UPnP `SetAVTransportURI` + `Play` can start a remote MP3 stream.
 - Storing a `source="UPNP"` item as a native Bose preset is unsafe: recalling
   that preset can wedge the speaker's UPnP service until reboot.
+- Native SoundTouch preset labels can be synced safely through
+  `POST /storePreset` using `LOCAL_INTERNET_RADIO` descriptor URLs, so the
+  speaker display shows the configured Homey preset name immediately when a
+  physical preset button is pressed.
 
 ## Architecture
 
@@ -62,23 +66,22 @@ discovery is blocked.
 
 ## Initial Scope
 
-Version 0.1 should support:
+Version 0.1 supports:
 
 - one or more paired Bose SoundTouch speakers
 - automatic discovery during pairing
-- manual IP fallback
 - six configured preset URLs per speaker
 - direct `http://` stream URL validation for presets and Flow playback
 - WebSocket logging of preset button events
 - playback via UPnP AVTransport
+- native SoundTouch preset label sync for the six configured slots
 - Homey device controls for power, stop, volume, and preset buttons
 - useful speaker metadata in device settings: active preset and compact status
 - reconnect logic for WebSocket disconnects
 - clear unavailable state when the speaker or UPnP service is unreachable
 
-The current implementation already exposes six preset slots in device settings.
-The remaining validation step is to capture the exact WebSocket payload emitted
-by each physical preset button on real speakers.
+Manual IP fallback and repair/remap flows are planned follow-ups for networks
+where multicast discovery is blocked or speaker IPs change.
 
 Preset URLs should be direct `http://` MP3 or AAC streams. HTTPS, web player,
 and playlist URLs are not supported reliably by older SoundTouch playback, so
@@ -177,6 +180,8 @@ The current app prototype:
 - connects to `ws://<speaker-ip>:8080` using subprotocol `gabbo`
 - logs and stores raw WebSocket events only while debug logging is enabled
 - stores active preset and compact connection/source metadata in device settings
+- syncs native SoundTouch preset names through `/storePreset` so the speaker
+  display matches the configured Homey preset name
 - triggers a Homey Flow card when a preset event is detected
 - maps physical preset 1 through 6 to configured stream URLs
 - updates dashboard preset button titles from the configured preset names and
