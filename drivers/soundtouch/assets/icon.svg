@@ -1,27 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch speaker">
-  <g fill="none" stroke="#222222" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="260" y="112" width="440" height="736" rx="48" stroke-width="42"/>
-    <rect x="344" y="194" width="272" height="60" rx="26" stroke-width="28"/>
-    <path d="M304 336h352" stroke-width="32"/>
-    <path d="M320 404h320" stroke="#777777" stroke-width="20"/>
-  </g>
-  <g fill="#222222">
-    <circle cx="390" cy="224" r="13"/>
-    <circle cx="480" cy="224" r="10"/>
-    <circle cx="570" cy="224" r="10"/>
-  </g>
-  <g fill="#777777">
-    <circle cx="344" cy="512" r="14"/>
-    <circle cx="432" cy="512" r="14"/>
-    <circle cx="520" cy="512" r="14"/>
-    <circle cx="608" cy="512" r="14"/>
-    <circle cx="344" cy="606" r="14"/>
-    <circle cx="432" cy="606" r="14"/>
-    <circle cx="520" cy="606" r="14"/>
-    <circle cx="608" cy="606" r="14"/>
-    <circle cx="344" cy="700" r="14"/>
-    <circle cx="432" cy="700" r="14"/>
-    <circle cx="520" cy="700" r="14"/>
-    <circle cx="608" cy="700" r="14"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
+  <!-- Dual-mode: dark body reads on light backgrounds, white outline + details read on dark backgrounds -->
+  <rect x="288" y="96" width="384" height="768" rx="80" fill="#202124" stroke="#ffffff" stroke-width="24" stroke-linejoin="round"/>
+
+  <!-- Top control pill -->
+  <rect x="360" y="176" width="240" height="68" rx="34" fill="none" stroke="#ffffff" stroke-width="15"/>
+  <circle cx="402" cy="210" r="14" fill="#ffffff"/>
+  <circle cx="480" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
+  <circle cx="558" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
+
+  <!-- Display bars -->
+  <rect x="348" y="312" width="264" height="24" rx="12" fill="#ffffff"/>
+  <rect x="372" y="360" width="216" height="14" rx="7" fill="#ffffff" opacity="0.85"/>
+
+  <!-- Speaker grille -->
+  <g fill="#ffffff" opacity="0.9">
+    <circle cx="348" cy="500" r="13"/>
+    <circle cx="414" cy="500" r="13"/>
+    <circle cx="480" cy="500" r="13"/>
+    <circle cx="546" cy="500" r="13"/>
+    <circle cx="612" cy="500" r="13"/>
+    <circle cx="348" cy="576" r="13"/>
+    <circle cx="414" cy="576" r="13"/>
+    <circle cx="480" cy="576" r="13"/>
+    <circle cx="546" cy="576" r="13"/>
+    <circle cx="612" cy="576" r="13"/>
+    <circle cx="348" cy="652" r="13"/>
+    <circle cx="414" cy="652" r="13"/>
+    <circle cx="480" cy="652" r="13"/>
+    <circle cx="546" cy="652" r="13"/>
+    <circle cx="612" cy="652" r="13"/>
+    <circle cx="348" cy="728" r="13"/>
+    <circle cx="414" cy="728" r="13"/>
+    <circle cx="480" cy="728" r="13"/>
+    <circle cx="546" cy="728" r="13"/>
+    <circle cx="612" cy="728" r="13"/>
   </g>
 </svg>

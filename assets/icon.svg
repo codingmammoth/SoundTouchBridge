@@ -1,31 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch 10 Bridge">
-  <path fill="#ffffff" fill-rule="evenodd" d="M286 82h388c42 0 76 34 76 76v644c0 42-34 76-76 76H286c-42 0-76-34-76-76V158c0-42 34-76 76-76Zm0 48c-16 0-28 12-28 28v644c0 16 12 28 28 28h388c16 0 28-12 28-28V158c0-16-12-28-28-28H286Z"/>
-  <path fill="#ffffff" d="M238 314h484v48H238z"/>
-  <path fill="#ffffff" opacity="0.9" d="M238 386h484v24H238z"/>
-  <path fill="#ffffff" fill-rule="evenodd" d="M352 176h256c22 0 40 18 40 40v14c0 22-18 40-40 40H352c-22 0-40-18-40-40v-14c0-22 18-40 40-40Zm0 34c-4 0-6 2-6 6v14c0 4 2 6 6 6h256c4 0 6-2 6-6v-14c0-4-2-6-6-6H352Z"/>
-  <circle cx="390" cy="223" r="16" fill="#ffffff"/>
-  <circle cx="480" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
-  <circle cx="570" cy="223" r="12" fill="#ffffff" opacity="0.72"/>
-  <g fill="#ffffff" opacity="0.74">
-    <circle cx="328" cy="494" r="12"/>
-    <circle cx="404" cy="494" r="12"/>
-    <circle cx="480" cy="494" r="12"/>
-    <circle cx="556" cy="494" r="12"/>
-    <circle cx="632" cy="494" r="12"/>
-    <circle cx="328" cy="570" r="12"/>
-    <circle cx="404" cy="570" r="12"/>
-    <circle cx="480" cy="570" r="12"/>
-    <circle cx="556" cy="570" r="12"/>
-    <circle cx="632" cy="570" r="12"/>
-    <circle cx="328" cy="646" r="12"/>
-    <circle cx="404" cy="646" r="12"/>
-    <circle cx="480" cy="646" r="12"/>
-    <circle cx="556" cy="646" r="12"/>
-    <circle cx="632" cy="646" r="12"/>
-    <circle cx="328" cy="722" r="12"/>
-    <circle cx="404" cy="722" r="12"/>
-    <circle cx="480" cy="722" r="12"/>
-    <circle cx="556" cy="722" r="12"/>
-    <circle cx="632" cy="722" r="12"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
+  <!-- Dual-mode: dark body reads on light backgrounds, white outline + details read on dark backgrounds -->
+  <rect x="288" y="96" width="384" height="768" rx="80" fill="#202124" stroke="#ffffff" stroke-width="24" stroke-linejoin="round"/>
+
+  <!-- Top control pill -->
+  <rect x="360" y="176" width="240" height="68" rx="34" fill="none" stroke="#ffffff" stroke-width="15"/>
+  <circle cx="402" cy="210" r="14" fill="#ffffff"/>
+  <circle cx="480" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
+  <circle cx="558" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
+
+  <!-- Display bars -->
+  <rect x="348" y="312" width="264" height="24" rx="12" fill="#ffffff"/>
+  <rect x="372" y="360" width="216" height="14" rx="7" fill="#ffffff" opacity="0.85"/>
+
+  <!-- Speaker grille -->
+  <g fill="#ffffff" opacity="0.9">
+    <circle cx="348" cy="500" r="13"/>
+    <circle cx="414" cy="500" r="13"/>
+    <circle cx="480" cy="500" r="13"/>
+    <circle cx="546" cy="500" r="13"/>
+    <circle cx="612" cy="500" r="13"/>
+    <circle cx="348" cy="576" r="13"/>
+    <circle cx="414" cy="576" r="13"/>
+    <circle cx="480" cy="576" r="13"/>
+    <circle cx="546" cy="576" r="13"/>
+    <circle cx="612" cy="576" r="13"/>
+    <circle cx="348" cy="652" r="13"/>
+    <circle cx="414" cy="652" r="13"/>
+    <circle cx="480" cy="652" r="13"/>
+    <circle cx="546" cy="652" r="13"/>
+    <circle cx="612" cy="652" r="13"/>
+    <circle cx="348" cy="728" r="13"/>
+    <circle cx="414" cy="728" r="13"/>
+    <circle cx="480" cy="728" r="13"/>
+    <circle cx="546" cy="728" r="13"/>
+    <circle cx="612" cy="728" r="13"/>
   </g>
 </svg>
