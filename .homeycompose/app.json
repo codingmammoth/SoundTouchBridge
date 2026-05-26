@@ -1,8 +1,10 @@
 {
   "id": "com.codingmammoth.soundtouchbridge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "compatibility": ">=5.0.0",
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "sdk": 3,
   "brandColor": "#222222",
   "name": {
@@ -18,7 +20,13 @@
   },
   "category": "music",
   "tags": {
-    "en": ["bose", "soundtouch", "radio", "music", "upnp"]
+    "en": [
+      "bose",
+      "soundtouch",
+      "radio",
+      "music",
+      "upnp"
+    ]
   },
   "author": {
     "name": "CodingMammoth"
