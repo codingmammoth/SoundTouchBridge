@@ -1,38 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
-  <!-- Dual-mode: dark body reads on light backgrounds, white outline + details read on dark backgrounds -->
-  <rect x="288" y="96" width="384" height="768" rx="80" fill="#202124" stroke="#ffffff" stroke-width="24" stroke-linejoin="round"/>
-
-  <!-- Top control pill -->
-  <rect x="360" y="176" width="240" height="68" rx="34" fill="none" stroke="#ffffff" stroke-width="15"/>
-  <circle cx="402" cy="210" r="14" fill="#ffffff"/>
-  <circle cx="480" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
-  <circle cx="558" cy="210" r="11" fill="#ffffff" opacity="0.8"/>
-
-  <!-- Display bars -->
-  <rect x="348" y="312" width="264" height="24" rx="12" fill="#ffffff"/>
-  <rect x="372" y="360" width="216" height="14" rx="7" fill="#ffffff" opacity="0.85"/>
-
-  <!-- Speaker grille -->
-  <g fill="#ffffff" opacity="0.9">
-    <circle cx="348" cy="500" r="13"/>
-    <circle cx="414" cy="500" r="13"/>
-    <circle cx="480" cy="500" r="13"/>
-    <circle cx="546" cy="500" r="13"/>
-    <circle cx="612" cy="500" r="13"/>
-    <circle cx="348" cy="576" r="13"/>
-    <circle cx="414" cy="576" r="13"/>
-    <circle cx="480" cy="576" r="13"/>
-    <circle cx="546" cy="576" r="13"/>
-    <circle cx="612" cy="576" r="13"/>
-    <circle cx="348" cy="652" r="13"/>
-    <circle cx="414" cy="652" r="13"/>
-    <circle cx="480" cy="652" r="13"/>
-    <circle cx="546" cy="652" r="13"/>
-    <circle cx="612" cy="652" r="13"/>
-    <circle cx="348" cy="728" r="13"/>
-    <circle cx="414" cy="728" r="13"/>
-    <circle cx="480" cy="728" r="13"/>
-    <circle cx="546" cy="728" r="13"/>
-    <circle cx="612" cy="728" r="13"/>
-  </g>
+  <!-- Homey recolours app/driver icons into a single flat mask, so detail must come from
+       negative space (cut-out holes), not colour. evenodd subtracts the inner subpaths. -->
+  <path fill="#1d1d1f" fill-rule="evenodd" d="M400 210 H560 A70 70 0 0 1 630 280 V680 A70 70 0 0 1 560 750 H400 A70 70 0 0 1 330 680 V280 A70 70 0 0 1 400 210 Z
+    M403 270 H557 A23 23 0 0 1 557 316 H403 A23 23 0 0 1 403 270 Z
+    M372 430 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M432 430 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M492 430 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M552 430 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M372 496 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M432 496 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M492 496 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M552 496 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M372 562 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M432 562 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M492 562 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M552 562 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M372 628 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M432 628 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M492 628 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z
+    M552 628 a18 18 0 1 0 36 0 a18 18 0 1 0 -36 0 Z"/>
 </svg>
