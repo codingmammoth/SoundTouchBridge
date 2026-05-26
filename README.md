@@ -1,6 +1,6 @@
-# HomeyBose
+# SoundTouch Bridge
 
-HomeyBose is planned as a Homey Pro app that revives useful physical preset
+SoundTouch Bridge is a Homey Pro app that revives useful physical preset
 buttons on Bose SoundTouch speakers after Bose's SoundTouch cloud shutdown.
 
 The intended approach is local-only:
@@ -36,7 +36,7 @@ Bose physical preset button
 Bose WebSocket event on ws://<speaker-ip>:8080
         |
         v
-HomeyBose app on Homey Pro
+SoundTouch Bridge app on Homey Pro
         |
         v
 UPnP SetAVTransportURI + Play on http://<speaker-ip>:8091/AVTransport/Control

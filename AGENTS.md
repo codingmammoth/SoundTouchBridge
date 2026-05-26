@@ -1,13 +1,13 @@
-# HomeyBose Agent Notes
+# SoundTouch Bridge Agent Notes
 
 ## Project Summary
 
-HomeyBose is a local-only Homey Pro app for Bose SoundTouch speakers. It lets
+SoundTouch Bridge is a local-only Homey Pro app for Bose SoundTouch speakers. It lets
 Homey act as the always-on bridge between physical SoundTouch preset button
 presses and user-managed internet radio streams.
 
-The app does not try to replace the Bose cloud or write native Bose presets.
-Instead, it listens for local SoundTouch events and starts playback through the
+The app does not try to replace the Bose cloud. It listens for local SoundTouch
+events, syncs native preset labels for display, and starts playback through the
 speaker's UPnP AVTransport endpoint.
 
 ## Architecture

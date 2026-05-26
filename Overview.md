@@ -1,6 +1,6 @@
-# HomeyBose Overview
+# SoundTouch Bridge Overview
 
-HomeyBose is a Homey Pro app for locally controlling Bose SoundTouch speakers
+SoundTouch Bridge is a Homey Pro app for locally controlling Bose SoundTouch speakers
 with internet radio presets. It keeps the experience local: Homey discovers the
 speaker on the LAN, listens for preset button events, and starts playback
 directly on the speaker.
