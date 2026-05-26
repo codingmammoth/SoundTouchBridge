@@ -31,6 +31,12 @@
   "author": {
     "name": "CodingMammoth"
   },
+  "homepage": "https://github.com/codingmammoth/SoundTouchBridge#readme",
+  "support": "https://github.com/codingmammoth/SoundTouchBridge/issues",
+  "source": "https://github.com/codingmammoth/SoundTouchBridge",
+  "bugs": {
+    "url": "https://github.com/codingmammoth/SoundTouchBridge/issues"
+  },
   "api": {
     "getPresetDevices": {
       "method": "GET",
