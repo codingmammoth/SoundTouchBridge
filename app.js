@@ -125,6 +125,9 @@ class SoundTouchBridgeApp extends Homey.App {
     if (typeof device.syncPresetButtonTitles === "function") {
       await device.syncPresetButtonTitles();
     }
+    if (typeof device.syncNativePresetNames === "function") {
+      await device.syncNativePresetNames();
+    }
   }
 }
 

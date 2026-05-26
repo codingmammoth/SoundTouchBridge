@@ -15,6 +15,7 @@ const {
   selectLastSource,
   setVolume,
   standby,
+  storeNativePreset,
   stopPlayback,
   validateStreamUrl,
 } = require("../../lib/soundtouch-client");
@@ -98,6 +99,7 @@ class SoundTouchDevice extends Homey.Device {
     await this.ensurePublishReadySettings();
     await this.syncPresetSettingsUi();
     await this.syncPresetButtonTitles();
+    await this.syncNativePresetNames();
     await this.syncPresetCapabilitySelection();
     this.registerCapabilityListeners();
     await this.syncStatus();
@@ -111,6 +113,13 @@ class SoundTouchDevice extends Homey.Device {
 
   async onSettings({ newSettings, changedKeys }) {
     this.validatePresetUrlSettings(newSettings, changedKeys);
+
+    const presetSettingsChanged = changedKeys.some((key) => /^preset[1-6]_(name|url)$/.test(key));
+    if (presetSettingsChanged) {
+      await this.syncPresetSettingsUi(newSettings);
+      await this.syncPresetButtonTitles(newSettings);
+      await this.syncNativePresetNames();
+    }
 
     if (changedKeys.includes("ip_address")) {
       const nextAddress = String(newSettings.ip_address || "").trim();
@@ -244,6 +253,7 @@ class SoundTouchDevice extends Homey.Device {
       last_websocket_activity: "None",
       last_action: "None",
       last_playback_error: "None",
+      native_preset_sync: "Not synced yet",
     };
     if (settings.debug_enabled === true) {
       updates.debug_enabled = false;
@@ -322,6 +332,35 @@ class SoundTouchDevice extends Homey.Device {
     if (typeof this.setStoreValue === "function") {
       await this.setStoreValue("preset_button_titles", JSON.stringify(nextTitles));
     }
+  }
+
+  async syncNativePresetNames() {
+    if (!this.address) {
+      return;
+    }
+
+    const settings = this.getSettings();
+    const results = [];
+    for (let preset = 1; preset <= 6; preset += 1) {
+      const name = this.getPresetName(preset, settings);
+      const streamUrl = String(settings[`preset${preset}_url`] || "").trim();
+      if (!streamUrl) {
+        results.push(`${preset}: skipped, no URL`);
+        continue;
+      }
+
+      try {
+        await storeNativePreset(this.address, preset, {
+          name,
+          streamUrl,
+        });
+        results.push(`${preset}: synced ${name}`);
+      } catch (error) {
+        results.push(`${preset}: failed (${error.message})`);
+      }
+    }
+
+    await this.setDiagnosticSetting("native_preset_sync", results.join(" | "));
   }
 
   getPresetLabel(preset, settings = this.getSettings()) {

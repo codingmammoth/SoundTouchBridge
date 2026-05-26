@@ -353,6 +353,14 @@
               "value": "Unknown"
             },
             {
+              "id": "native_preset_sync",
+              "type": "label",
+              "label": {
+                "en": "Native preset sync"
+              },
+              "value": "Not synced yet"
+            },
+            {
               "id": "websocket_status",
               "type": "label",
               "label": {
