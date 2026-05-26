@@ -1,0 +1,5 @@
+{
+  "0.2.0": {
+    "en": "Initial beta with local SoundTouch discovery, six configurable presets, physical preset handling, Homey controls, Flow actions, native preset name sync, and playback diagnostics."
+  }
+}
