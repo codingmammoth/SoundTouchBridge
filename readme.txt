@@ -1,3 +1,5 @@
-SoundTouch Bridge keeps Bose SoundTouch speakers useful with Homey after the SoundTouch cloud service shutdown. Pair your speaker on the local network, assign direct internet radio streams to the six preset slots, and keep using the physical preset buttons.
+After Bose ended the SoundTouch cloud service, the features many SoundTouch speakers depended on stopped working: the physical preset buttons no longer recall stations and internet radio streaming is gone, leaving only AirPlay, Bluetooth and AUX. SoundTouch Bridge brings the core experience back so your speakers stay useful instead of becoming e-waste. Homey runs on your local network as an always-on bridge between the speaker and the internet radio you choose.
 
-Homey stays online as the local bridge, syncs preset names to the speaker display, and starts playback directly on the speaker. This app is unofficial and is not affiliated with Bose.
+Pair your speaker, assign a direct internet radio stream to each of the six preset slots, and the physical preset buttons work again. Preset names are synced to the speaker display, and you can also start any preset or stream from Homey and from Flows. This is not a full replacement for the original cloud features, but it restores the day-to-day experience to a good level. Only direct HTTP audio streams are supported; HTTPS, HLS and playlist links are not.
+
+This app is unofficial and is not affiliated with, authorised by, or endorsed by Bose. Bose and SoundTouch are trademarks of their respective owner and are used only to describe compatibility.

@@ -13,5 +13,8 @@
   },
   "0.3.0": {
     "en": "First beta version of SoundTouch Bridge - Fixed icons and added social links"
+  },
+  "0.4.0": {
+    "en": "New app icon and redesigned App Store and device images, dedicated Flow card icons, and a cleaner device settings page. Debug logging and live diagnostics now live in the app settings under \"Show debug info\". Extended the store description."
   }
 }
