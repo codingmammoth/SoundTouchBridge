@@ -53,6 +53,14 @@
     "updatePreset": {
       "method": "PUT",
       "path": "/presets"
+    },
+    "getDiagnostics": {
+      "method": "POST",
+      "path": "/diagnostics"
+    },
+    "setDebugLogging": {
+      "method": "POST",
+      "path": "/debug-logging"
     }
   }
 }

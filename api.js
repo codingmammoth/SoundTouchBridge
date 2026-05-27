@@ -16,9 +16,19 @@ async function updatePreset({ homey, body }) {
   return homey.app.updatePreset(body || {});
 }
 
+async function getDiagnostics({ homey, body }) {
+  return homey.app.getDeviceDiagnostics(body || {});
+}
+
+async function setDebugLogging({ homey, body }) {
+  return homey.app.setDebugLogging(body || {});
+}
+
 module.exports = {
   getPresetDevices,
   searchStations,
   savePreset,
   updatePreset,
+  getDiagnostics,
+  setDebugLogging,
 };

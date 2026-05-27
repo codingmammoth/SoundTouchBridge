@@ -106,6 +106,53 @@ class SoundTouchBridgeApp extends Homey.App {
     };
   }
 
+  async getDeviceDiagnostics({ deviceId }) {
+    const device = await this.getPresetDevice(deviceId);
+    const settings = device.getSettings();
+    const store = typeof device.getStore === "function" ? device.getStore() || {} : {};
+
+    function readSetting(key, fallback) {
+      const value = settings[key];
+      const text = String(value == null ? "" : value).trim();
+      return text || fallback;
+    }
+
+    function readDiagnostic(key, fallback) {
+      const value = store[`diag_${key}`];
+      const text = String(value == null ? "" : value).trim();
+      return text || fallback;
+    }
+
+    return {
+      deviceId: String(device.getData().id || ""),
+      name: device.getName(),
+      debugEnabled: store.debug_enabled === true,
+      fields: [
+        { label: "Status", value: readDiagnostic("speaker_status", "Unknown") },
+        { label: "Active preset", value: readDiagnostic("active_preset", "None") },
+        { label: "IP address", value: readSetting("ip_address", "Unknown") },
+        { label: "WebSocket", value: readDiagnostic("websocket_status", "Unknown") },
+        { label: "Last WebSocket activity", value: readDiagnostic("last_websocket_activity", "None") },
+        { label: "Native preset sync", value: readDiagnostic("native_preset_sync", "Not synced yet") },
+        { label: "Last action", value: readDiagnostic("last_action", "None") },
+        { label: "Last playback error", value: readDiagnostic("last_playback_error", "None") },
+        { label: "Last WebSocket event", value: readDiagnostic("last_event", "None") },
+      ],
+    };
+  }
+
+  async setDebugLogging({ deviceId, enabled }) {
+    const device = await this.getPresetDevice(deviceId);
+    const value = enabled === true;
+    if (typeof device.setStoreValue === "function") {
+      await device.setStoreValue("debug_enabled", value);
+    }
+    return {
+      deviceId: String(device.getData().id || ""),
+      debugEnabled: value,
+    };
+  }
+
   async getPresetDevice(deviceId) {
     const driver = await this.getSoundTouchDriver();
     const devices = await driver.getDevices();

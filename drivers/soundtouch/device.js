@@ -246,19 +246,13 @@ class SoundTouchDevice extends Homey.Device {
       return;
     }
 
-    const settings = this.getSettings();
-    const updates = {
-      last_event: "Enable debug logging to capture raw events.",
-      websocket_status: "Unknown",
-      last_websocket_activity: "None",
-      last_action: "None",
-      last_playback_error: "None",
-      native_preset_sync: "Not synced yet",
-    };
-    if (settings.debug_enabled === true) {
-      updates.debug_enabled = false;
-    }
-    await this.setSettings(updates);
+    await this.setStoreValue("debug_enabled", false);
+    await this.setDiagnostic("last_event", "Enable debug logging to capture raw events.");
+    await this.setDiagnostic("websocket_status", "Unknown");
+    await this.setDiagnostic("last_websocket_activity", "None");
+    await this.setDiagnostic("last_action", "None");
+    await this.setDiagnostic("last_playback_error", "None");
+    await this.setDiagnostic("native_preset_sync", "Not synced yet");
     await this.setStoreValue("publish_ready_settings_applied", true);
   }
 
@@ -394,9 +388,7 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async syncActivePresetSetting(settings = this.getSettings()) {
-    await this.setSettings({
-      active_preset: this.getPresetLabel(this.activePreset, settings),
-    });
+    await this.setDiagnostic("active_preset", this.getPresetLabel(this.activePreset, settings));
   }
 
   findPresetByUrl(url, settings = this.getSettings()) {
@@ -457,14 +449,26 @@ class SoundTouchDevice extends Homey.Device {
     return `${timestamp} - ${String(message || "").slice(0, SETTING_TEXT_MAX_LENGTH - timestamp.length - 3)}`;
   }
 
-  async setDiagnosticSetting(key, message) {
-    try {
-      await this.setSettings({
-        [key]: this.formatDiagnostic(message),
-      });
-    } catch (error) {
-      this.log(`Could not update diagnostic setting ${key}: ${error.message}`);
+  isDebugEnabled() {
+    if (typeof this.getStoreValue === "function") {
+      return this.getStoreValue("debug_enabled") === true;
     }
+    return this.getStore().debug_enabled === true;
+  }
+
+  async setDiagnostic(key, value) {
+    if (typeof this.setStoreValue !== "function") {
+      return;
+    }
+    try {
+      await this.setStoreValue(`diag_${key}`, value);
+    } catch (error) {
+      this.log(`Could not update diagnostic ${key}: ${error.message}`);
+    }
+  }
+
+  async setDiagnosticSetting(key, message) {
+    await this.setDiagnostic(key, this.formatDiagnostic(message));
   }
 
   async recordAction(message) {
@@ -486,7 +490,7 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async clearPlaybackError() {
-    await this.setSettings({ last_playback_error: "None" });
+    await this.setDiagnostic("last_playback_error", "None");
     if (typeof this.unsetWarning === "function") {
       try {
         await this.unsetWarning();
@@ -628,10 +632,9 @@ class SoundTouchDevice extends Homey.Device {
   async handleWebSocketMessage(message) {
     const rawEvent = compactXml(message.toString());
     await this.recordWebSocketActivity(rawEvent.slice(0, 180));
-    const settings = this.getSettings();
-    if (settings.debug_enabled) {
+    if (this.isDebugEnabled()) {
       this.log(`Bose WebSocket event: ${rawEvent}`);
-      await this.setSettings({ last_event: rawEvent.slice(0, 500) });
+      await this.setDiagnostic("last_event", rawEvent.slice(0, 500));
     }
     await this.updateTelemetryFromEvent(rawEvent);
 
@@ -688,9 +691,7 @@ class SoundTouchDevice extends Homey.Device {
   async updateConnectionState(connectionState) {
     this.connectionState = connectionState.state || null;
     this.wifiSignal = connectionState.signal || null;
-    await this.setSettings({
-      speaker_status: this.formatSpeakerStatus(),
-    });
+    await this.setDiagnostic("speaker_status", this.formatSpeakerStatus());
 
     if (connectionState.up) {
       await this.setAvailable();
@@ -702,9 +703,7 @@ class SoundTouchDevice extends Homey.Device {
   async updateNowPlayingStatus(status) {
     this.currentSource = status.source || null;
     this.nowPlaying = status.summary || null;
-    await this.setSettings({
-      speaker_status: this.formatSpeakerStatus(),
-    });
+    await this.setDiagnostic("speaker_status", this.formatSpeakerStatus());
   }
 
   formatSpeakerStatus() {

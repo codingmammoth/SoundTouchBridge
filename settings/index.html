@@ -288,6 +288,55 @@
         line-height: 1.35;
       }
 
+      .debug-button {
+        margin-top: 10px;
+        width: 100%;
+      }
+
+      .debug-toggle {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin: 0 0 12px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .debug-toggle input {
+        width: auto;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        accent-color: var(--success);
+      }
+
+      .debug-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .debug-row {
+        display: grid;
+        gap: 3px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface-strong);
+      }
+
+      .debug-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .debug-value {
+        font-size: 14px;
+        line-height: 1.35;
+        word-break: break-word;
+      }
+
       @media (max-width: 720px) {
         .preset-row,
         .search-grid,
@@ -338,6 +387,7 @@
     <div class="section">
       <label for="device">Speaker</label>
       <select id="device"></select>
+      <button id="debug-info" class="secondary debug-button">Show debug info</button>
     </div>
 
     <div class="section">
@@ -391,6 +441,29 @@
       </div>
     </div>
 
+    <div id="debug-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="debug-title">
+      <div class="dialog">
+        <div class="dialog-header">
+          <h2 id="debug-title">Debug info</h2>
+          <span id="debug-subtitle" class="status"></span>
+        </div>
+        <div class="dialog-body">
+          <label class="debug-toggle">
+            <input id="debug-toggle" type="checkbox">
+            <span>Debug logging</span>
+          </label>
+          <p class="modal-help">Turn on Debug logging to capture raw Bose WebSocket events while troubleshooting. The fields below show live, read-only status for the selected speaker.</p>
+          <div id="debug-list" class="debug-list">
+            <div class="empty">Loading...</div>
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button id="debug-refresh" class="secondary">Refresh</button>
+          <button id="debug-close">Close</button>
+        </div>
+      </div>
+    </div>
+
     <script type="text/javascript">
       (function () {
         var devices = [];
@@ -407,6 +480,11 @@
         var resultsEl = document.getElementById("results");
         var manualNameEl = document.getElementById("manual-name");
         var manualUrlEl = document.getElementById("manual-url");
+        var debugButton = document.getElementById("debug-info");
+        var debugModalEl = document.getElementById("debug-modal");
+        var debugListEl = document.getElementById("debug-list");
+        var debugSubtitleEl = document.getElementById("debug-subtitle");
+        var debugToggleEl = document.getElementById("debug-toggle");
         var NAME_MAX_LENGTH = 34;
 
         function api(method, path, body) {
@@ -656,10 +734,87 @@
           assignButton.disabled = !manualNameEl.value.trim() || !manualUrlEl.value.trim();
         }
 
+        function renderDiagnostics(data) {
+          var fields = data && data.fields ? data.fields : [];
+          if (!fields.length) {
+            debugListEl.innerHTML = '<div class="empty">No diagnostics available.</div>';
+            return;
+          }
+          var html = "";
+          for (var index = 0; index < fields.length; index += 1) {
+            html += '<div class="debug-row">'
+              + '<span class="debug-label">' + escapeHtml(fields[index].label) + '</span>'
+              + '<span class="debug-value">' + escapeHtml(fields[index].value) + '</span>'
+              + '</div>';
+          }
+          debugListEl.innerHTML = html;
+        }
+
+        function loadDiagnostics(device) {
+          debugSubtitleEl.textContent = "Loading...";
+          debugListEl.innerHTML = '<div class="empty">Loading...</div>';
+          api("POST", "/diagnostics", { deviceId: device.id }).then(function (data) {
+            debugSubtitleEl.textContent = data && data.name ? data.name : "";
+            debugToggleEl.checked = !!(data && data.debugEnabled);
+            renderDiagnostics(data);
+          }).catch(function (error) {
+            debugSubtitleEl.textContent = "";
+            debugListEl.innerHTML = '<div class="empty">Could not load diagnostics.</div>';
+            Homey.alert(error.message || String(error));
+          });
+        }
+
+        function onDebugToggle() {
+          var device = getSelectedDevice();
+          if (!device) {
+            return;
+          }
+          var enabled = debugToggleEl.checked;
+          debugToggleEl.disabled = true;
+          api("POST", "/debug-logging", { deviceId: device.id, enabled: enabled }).then(function () {
+            loadDiagnostics(device);
+          }).catch(function (error) {
+            debugToggleEl.checked = !enabled;
+            Homey.alert(error.message || String(error));
+          }).then(function () {
+            debugToggleEl.disabled = false;
+          });
+        }
+
+        function openDebugModal() {
+          var device = getSelectedDevice();
+          if (!device) {
+            Homey.alert("Pair and select a SoundTouch speaker first.");
+            return;
+          }
+          debugModalEl.classList.add("open");
+          loadDiagnostics(device);
+        }
+
+        function closeDebugModal() {
+          debugModalEl.classList.remove("open");
+        }
+
+        function refreshDiagnostics() {
+          var device = getSelectedDevice();
+          if (device) {
+            loadDiagnostics(device);
+          }
+        }
+
         function onReady() {
           searchButton.addEventListener("click", searchStations);
           assignButton.addEventListener("click", assignPreset);
           document.getElementById("cancel").addEventListener("click", closeModal);
+          debugButton.addEventListener("click", openDebugModal);
+          document.getElementById("debug-close").addEventListener("click", closeDebugModal);
+          document.getElementById("debug-refresh").addEventListener("click", refreshDiagnostics);
+          debugToggleEl.addEventListener("change", onDebugToggle);
+          debugModalEl.addEventListener("click", function (event) {
+            if (event.target === debugModalEl) {
+              closeDebugModal();
+            }
+          });
           deviceSelect.addEventListener("change", renderPresets);
           manualNameEl.addEventListener("input", updateAssignState);
           manualUrlEl.addEventListener("input", updateAssignState);
@@ -674,8 +829,14 @@
             }
           });
           document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape" && modalEl.classList.contains("open")) {
+            if (event.key !== "Escape") {
+              return;
+            }
+            if (modalEl.classList.contains("open")) {
               closeModal();
+            }
+            if (debugModalEl.classList.contains("open")) {
+              closeDebugModal();
             }
           });
 
