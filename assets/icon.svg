@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" role="img" aria-label="SoundTouch Bridge">
-  <!-- App logo: a play triangle bridging into broadcast waves — represents the app
-       relaying internet streams to the speaker. Distinct from the speaker-box driver
-       icon. Homey recolours icons into a flat single-colour mask, so the mark is built
-       from solid fills and round strokes in one colour. -->
-  <g fill="none" stroke="#1d1d1f" stroke-width="48" stroke-linecap="round" transform="translate(480 480) scale(1.45) translate(-480 -480)">
-    <path fill="#1d1d1f" stroke="none" d="M300 352 L300 608 A26 26 0 0 0 340 630 L520 502 A26 26 0 0 0 520 458 L340 330 A26 26 0 0 0 300 352 Z"/>
-    <path d="M560 402 A92 92 0 0 1 560 558"/>
-    <path d="M610 326 A182 182 0 0 1 610 634"/>
-    <path d="M660 250 A272 272 0 0 1 660 710"/>
+  <!-- App logo: a play triangle bridging into broadcast waves — the app relaying internet
+       streams to the speaker. Solid filled paths only (no strokes, no transforms) so Homey's
+       flat icon rasteriser renders it reliably. Sized to fill the icon circle (artwork kept
+       within ~radius 430 of the 480,480 centre to survive the circular crop). -->
+  <g fill="#ffffff">
+    <path d="M124.8 241.28 L124.8 717.44 A48.26 48.26 0 0 0 199.04 758.4 L533.12 520.32 A48.26 48.26 0 0 0 533.12 438.4 L199.04 201.6 A48.26 48.26 0 0 0 124.8 241.28 Z"/>
+    <path d="M622.72 400.64 A99.84 99.84 0 0 1 622.72 558.08 L595.97 523.78 A56.32 56.32 0 0 0 595.97 434.94 Z"/>
+    <path d="M676.35 332.16 A186.88 186.88 0 0 1 676.35 626.56 L649.6 592.38 A143.36 143.36 0 0 0 649.6 366.34 Z"/>
+    <path d="M729.98 263.55 A273.92 273.92 0 0 1 729.98 695.17 L703.1 660.86 A230.4 230.4 0 0 0 703.1 297.86 Z"/>
   </g>
 </svg>
