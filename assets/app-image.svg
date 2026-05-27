@@ -1,19 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-label="SoundTouch Bridge app image">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-label="SoundTouch Bridge — restore your SoundTouch speakers">
   <defs>
-    <linearGradient id="background" x1="120" y1="40" x2="900" y2="690" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f7f8fb"/>
-      <stop offset="0.42" stop-color="#d9dde5"/>
-      <stop offset="1" stop-color="#8d95a3"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1000" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1a2742"/>
+      <stop offset="0.55" stop-color="#101a2e"/>
+      <stop offset="1" stop-color="#0a0f1a"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(660 205) rotate(128) scale(620 430)">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.76"/>
-      <stop offset="0.42" stop-color="#f4f7fb" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#eef1f6" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(300 300) rotate(118) scale(520 480)">
+      <stop offset="0" stop-color="#3a78d6" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#27457e" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#1a2742" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="body" x1="110" y1="190" x2="340" y2="560" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3b414a"/>
+      <stop offset="0.55" stop-color="#23272d"/>
+      <stop offset="1" stop-color="#14171b"/>
+    </linearGradient>
+    <linearGradient id="grille" x1="132" y1="242" x2="318" y2="488" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#565c65"/>
+      <stop offset="0.5" stop-color="#3a3f47"/>
+      <stop offset="1" stop-color="#2a2e34"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(180 270) rotate(56) scale(250 190)">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="perf" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="2.3" fill="#0e1115" opacity="0.55"/>
+    </pattern>
+    <clipPath id="grilleClip">
+      <rect x="132" y="242" width="186" height="246" rx="10"/>
+    </clipPath>
   </defs>
 
-  <rect width="1000" height="700" fill="url(#background)"/>
+  <rect width="1000" height="700" fill="url(#bg)"/>
   <rect width="1000" height="700" fill="url(#glow)"/>
-  <path d="M0 515c145-60 285-77 420-51 151 30 280 103 580 53v183H0z" fill="#ffffff" opacity="0.2"/>
-  <path d="M0 585c196-42 374-35 533 20 123 42 273 45 467 0v95H0z" fill="#242a33" opacity="0.1"/>
+
+  <!-- subtle streaming waves kept beside the speaker, clear of the text column -->
+  <g fill="none" stroke="#5fa8ff" stroke-linecap="round">
+    <path d="M348 322 A40 40 0 0 1 348 400" stroke-width="6" opacity="0.55"/>
+    <path d="M348 292 A70 70 0 0 1 348 430" stroke-width="6" opacity="0.28"/>
+  </g>
+
+  <!-- speaker -->
+  <ellipse cx="225" cy="576" rx="140" ry="16" fill="#000000" opacity="0.22"/>
+  <rect x="110" y="190" width="230" height="370" rx="24" fill="url(#body)"/>
+  <rect x="110" y="190" width="230" height="370" rx="24" fill="none" stroke="#0d0f12" stroke-width="2" opacity="0.5"/>
+
+  <rect x="132" y="204" width="186" height="30" rx="8" fill="#13161a"/>
+  <g>
+    <circle cx="150" cy="219" r="5.5" fill="#7d848d"/>
+    <circle cx="180" cy="219" r="5.5" fill="#7d848d"/>
+    <circle cx="210" cy="219" r="5.5" fill="#5fa8ff"/>
+    <circle cx="240" cy="219" r="5.5" fill="#7d848d"/>
+    <circle cx="270" cy="219" r="5.5" fill="#7d848d"/>
+    <circle cx="300" cy="219" r="5.5" fill="#7d848d"/>
+  </g>
+
+  <g clip-path="url(#grilleClip)">
+    <rect x="132" y="242" width="186" height="246" fill="url(#grille)"/>
+    <rect x="132" y="242" width="186" height="246" fill="url(#perf)"/>
+    <rect x="132" y="242" width="186" height="246" fill="url(#sheen)"/>
+  </g>
+  <rect x="132" y="242" width="186" height="246" rx="10" fill="none" stroke="#0d0f12" stroke-width="2" opacity="0.4"/>
+
+  <rect x="168" y="500" width="114" height="36" rx="9" fill="#0a0c0f"/>
+  <circle cx="187" cy="518" r="6.5" fill="#5fa8ff"/>
+  <rect x="202" y="511" width="68" height="5" rx="2.5" fill="#5fa8ff" opacity="0.9"/>
+  <rect x="202" y="522" width="44" height="4" rx="2" fill="#4b525b"/>
+
+  <!-- title, top of the right column -->
+  <text x="440" y="232" font-family="Helvetica, Arial, sans-serif" font-size="60" font-weight="700" fill="#ffffff">SoundTouch</text>
+  <text x="440" y="300" font-family="Helvetica, Arial, sans-serif" font-size="60" font-weight="700" fill="#5fa8ff">Bridge</text>
+
+  <!-- subtext -->
+  <g font-family="Helvetica, Arial, sans-serif" font-size="25" font-weight="400" fill="#b6c0d0">
+    <text x="441" y="392">Restore your SoundTouch speakers'</text>
+    <text x="441" y="428">functionality. Bring back the presets</text>
+    <text x="441" y="464">and radio streams.</text>
+  </g>
 </svg>
