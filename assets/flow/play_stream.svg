@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Play stream">
+  <!-- A globe with a play badge — playing an internet/URL stream. currentColor so Homey can
+       tint it; the play triangle is an evenodd cut-out so it stays visible under any tint. -->
+  <g fill="none" stroke="currentColor" stroke-width="1.8">
+    <circle cx="10.5" cy="10.5" r="7.5"/>
+    <line x1="3" y1="10.5" x2="18" y2="10.5"/>
+    <ellipse cx="10.5" cy="10.5" rx="3.3" ry="7.5"/>
+  </g>
+  <path fill="currentColor" fill-rule="evenodd" d="M12.8 18 A5.2 5.2 0 1 0 23.2 18 A5.2 5.2 0 1 0 12.8 18 Z M16.4 15.6 L20.6 18 L16.4 20.4 Z"/>
+</svg>

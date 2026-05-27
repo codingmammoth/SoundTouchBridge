@@ -63,6 +63,7 @@
         "title": {
           "en": "A preset button was pressed"
         },
+        "icon": "/assets/flow/preset_pressed.svg",
         "tokens": [
           {
             "name": "preset",
@@ -97,6 +98,7 @@
         "titleFormatted": {
           "en": "Play configured preset [[preset]]"
         },
+        "icon": "/assets/flow/play_preset_slot.svg",
         "args": [
           {
             "type": "device",
@@ -158,6 +160,7 @@
         "titleFormatted": {
           "en": "Play stream [[url]]"
         },
+        "icon": "/assets/flow/play_stream.svg",
         "args": [
           {
             "type": "device",

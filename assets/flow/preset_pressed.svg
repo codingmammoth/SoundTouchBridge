@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Preset button pressed">
+  <!-- A preset button with a finger/arrow pressing down onto it. currentColor so Homey can tint it. -->
+  <rect x="4" y="14" width="16" height="6" rx="2" fill="currentColor"/>
+  <path d="M12 3 V10 M9 7 L12 10 L15 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
