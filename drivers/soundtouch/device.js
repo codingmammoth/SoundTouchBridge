@@ -3,6 +3,10 @@
 const Homey = require("homey");
 const WebSocket = require("ws");
 const {
+  countStationClick,
+  searchRandomCompatibleStations,
+} = require("../../lib/radio-browser-client");
+const {
   compactXml,
   extractConnectionState,
   extractNowPlayingStatus,
@@ -29,6 +33,7 @@ const PLAYBACK_VERIFY_INTERVAL_MS = 1500;
 const PRE_PLAY_WAKE_DELAY_MS = 1200;
 const RECOVERY_SETTLE_MS = 1500;
 const SETTING_TEXT_MAX_LENGTH = 900;
+const RANDOM_PLAYBACK_ATTEMPT_LIMIT = 4;
 const ORDERED_CAPABILITIES = [
   "preset_1",
   "preset_2",
@@ -80,6 +85,29 @@ const DEFAULT_PRESETS = [
 ];
 const PRESET_NAME_MAX_LENGTH = 24;
 
+function normalizeString(value) {
+  return String(value == null ? "" : value).trim();
+}
+
+function normalizeCountryCode(value) {
+  return normalizeString(value).toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
+}
+
+function isEnabled(value) {
+  return value === true || value === "true";
+}
+
+function shuffle(items) {
+  const copy = items.slice();
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const current = copy[index];
+    copy[index] = copy[swapIndex];
+    copy[swapIndex] = current;
+  }
+  return copy;
+}
+
 class SoundTouchDevice extends Homey.Device {
   async onInit() {
     this.ws = null;
@@ -114,7 +142,7 @@ class SoundTouchDevice extends Homey.Device {
   async onSettings({ newSettings, changedKeys }) {
     this.validatePresetUrlSettings(newSettings, changedKeys);
 
-    const presetSettingsChanged = changedKeys.some((key) => /^preset[1-6]_(name|url)$/.test(key));
+    const presetSettingsChanged = changedKeys.some((key) => /^preset[1-6]_(name|url|mode|random_)/.test(key));
     if (presetSettingsChanged) {
       await this.syncPresetSettingsUi(newSettings);
       await this.syncPresetButtonTitles(newSettings);
@@ -252,6 +280,7 @@ class SoundTouchDevice extends Homey.Device {
     await this.setDiagnostic("last_websocket_activity", "None");
     await this.setDiagnostic("last_action", "None");
     await this.setDiagnostic("last_playback_error", "None");
+    await this.setDiagnostic("last_random_station", "None");
     await this.setDiagnostic("native_preset_sync", "Not synced yet");
     await this.setStoreValue("publish_ready_settings_applied", true);
   }
@@ -259,9 +288,12 @@ class SoundTouchDevice extends Homey.Device {
   async syncPresetSettingsUi(settings = this.getSettings()) {
     const updates = {};
     for (let preset = 1; preset <= 6; preset += 1) {
-      const name = String(settings[`preset${preset}_name`] || "").trim();
-      const url = String(settings[`preset${preset}_url`] || "").trim();
-      const summary = name || (url ? `Preset ${preset}` : "Not assigned");
+      const mode = this.getPresetMode(preset, settings);
+      const name = this.getPresetName(preset, settings);
+      const url = normalizeString(settings[`preset${preset}_url`]);
+      const summary = mode === "random"
+        ? name
+        : (name !== `Preset ${preset}` || url ? name : "Not assigned");
 
       if (settings[`preset${preset}_summary`] !== summary) {
         updates[`preset${preset}_summary`] = summary;
@@ -284,8 +316,7 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   getPresetButtonTitle(preset, settings = this.getSettings(), activePreset = this.activePreset) {
-    const configuredName = String(settings[`preset${preset}_name`] || "").trim();
-    const title = configuredName || `Preset ${preset}`;
+    const title = this.getPresetName(preset, settings);
 
     if (title.length <= PRESET_NAME_MAX_LENGTH) {
       return title;
@@ -334,12 +365,16 @@ class SoundTouchDevice extends Homey.Device {
     }
 
     const settings = this.getSettings();
+    const store = this.getStore();
     const results = [];
     for (let preset = 1; preset <= 6; preset += 1) {
       const name = this.getPresetName(preset, settings);
-      const streamUrl = String(settings[`preset${preset}_url`] || "").trim();
+      const mode = this.getPresetMode(preset, settings);
+      const streamUrl = mode === "random"
+        ? normalizeString(store[`preset${preset}_last_station_url`])
+        : normalizeString(settings[`preset${preset}_url`]);
       if (!streamUrl) {
-        results.push(`${preset}: skipped, no URL`);
+        results.push(mode === "random" ? `${preset}: skipped, no random station yet` : `${preset}: skipped, no URL`);
         continue;
       }
 
@@ -348,7 +383,7 @@ class SoundTouchDevice extends Homey.Device {
           name,
           streamUrl,
         });
-        results.push(`${preset}: synced ${name}`);
+        results.push(mode === "random" ? `${preset}: synced ${name} fallback` : `${preset}: synced ${name}`);
       } catch (error) {
         results.push(`${preset}: failed (${error.message})`);
       }
@@ -362,12 +397,30 @@ class SoundTouchDevice extends Homey.Device {
       return "None";
     }
 
-    const configuredName = String(settings[`preset${preset}_name`] || "").trim();
-    return configuredName ? `${preset}. ${configuredName}` : `Preset ${preset}`;
+    return `${preset}. ${this.getPresetName(preset, settings)}`;
   }
 
   getPresetName(preset, settings = this.getSettings()) {
-    return String(settings[`preset${preset}_name`] || "").trim() || `Preset ${preset}`;
+    const configuredName = normalizeString(settings[`preset${preset}_name`]);
+    if (configuredName) {
+      return configuredName;
+    }
+    if (this.getPresetMode(preset, settings) === "random") {
+      return this.getRandomPresetLabel(preset, settings);
+    }
+    return `Preset ${preset}`;
+  }
+
+  getPresetMode(preset, settings = this.getSettings()) {
+    return normalizeString(settings[`preset${preset}_mode`]) === "random" ? "random" : "fixed";
+  }
+
+  getRandomPresetLabel(preset, settings = this.getSettings()) {
+    const tag = normalizeString(settings[`preset${preset}_random_tag`]);
+    const countryEnabled = isEnabled(settings[`preset${preset}_random_country_enabled`]);
+    const countrycode = normalizeCountryCode(settings[`preset${preset}_random_countrycode`]);
+    const labelTag = tag ? tag.charAt(0).toUpperCase() + tag.slice(1) : "Radio";
+    return countryEnabled && countrycode ? `Random ${labelTag} (${countrycode})` : `Random ${labelTag}`;
   }
 
   async setActivePreset(preset, settings = this.getSettings()) {
@@ -397,8 +450,12 @@ class SoundTouchDevice extends Homey.Device {
       return null;
     }
 
+    const store = this.getStore();
     for (let preset = 1; preset <= 6; preset += 1) {
-      if (String(settings[`preset${preset}_url`] || "").trim() === normalizedUrl) {
+      const configuredUrl = this.getPresetMode(preset, settings) === "random"
+        ? normalizeString(store[`preset${preset}_last_station_url`])
+        : normalizeString(settings[`preset${preset}_url`]);
+      if (configuredUrl === normalizedUrl) {
         return preset;
       }
     }
@@ -724,7 +781,12 @@ class SoundTouchDevice extends Homey.Device {
     }
 
     const settings = this.getSettings();
-    const url = String(settings[`preset${presetNumber}_url`] || "").trim();
+    if (this.getPresetMode(presetNumber, settings) === "random") {
+      await this.playRandomPreset(presetNumber, { source, settings });
+      return;
+    }
+
+    const url = normalizeString(settings[`preset${presetNumber}_url`]);
     if (!url) {
       await this.recordPlaybackError(`Preset ${presetNumber} has no stream URL configured.`, { warning: false });
       return;
@@ -736,6 +798,139 @@ class SoundTouchDevice extends Homey.Device {
       source,
       title: this.getPresetName(presetNumber, settings),
     });
+  }
+
+  getRandomPresetRule(preset, settings = this.getSettings()) {
+    const tag = normalizeString(settings[`preset${preset}_random_tag`]);
+    const countryEnabled = isEnabled(settings[`preset${preset}_random_country_enabled`]);
+    const countrycode = normalizeCountryCode(settings[`preset${preset}_random_countrycode`]);
+    return {
+      tag,
+      countryEnabled,
+      countrycode: countryEnabled ? countrycode : "",
+    };
+  }
+
+  getLastRandomStation(preset) {
+    const store = this.getStore();
+    const name = normalizeString(store[`preset${preset}_last_station_name`]);
+    const url = normalizeString(store[`preset${preset}_last_station_url`]);
+    const stationuuid = normalizeString(store[`preset${preset}_last_station_uuid`]);
+    if (!url) {
+      return null;
+    }
+    return {
+      name,
+      streamUrl: url,
+      stationuuid,
+    };
+  }
+
+  getRandomPlaybackCandidates(stations, lastStation) {
+    const seen = {};
+    const deduped = stations.filter((station) => {
+      const stationUuid = normalizeString(station.stationuuid).toLowerCase();
+      const streamUrl = normalizeString(station.streamUrl).toLowerCase();
+      const key = stationUuid || streamUrl;
+      if (!key || seen[key]) {
+        return false;
+      }
+      seen[key] = true;
+      return true;
+    });
+
+    if (deduped.length <= 1 || !lastStation) {
+      return shuffle(deduped);
+    }
+
+    const lastUuid = normalizeString(lastStation.stationuuid).toLowerCase();
+    const lastUrl = normalizeString(lastStation.streamUrl).toLowerCase();
+    const withoutLast = deduped.filter((station) => {
+      const stationUuid = normalizeString(station.stationuuid).toLowerCase();
+      const streamUrl = normalizeString(station.streamUrl).toLowerCase();
+      return !(lastUuid && stationUuid === lastUuid) && !(lastUrl && streamUrl === lastUrl);
+    });
+
+    return shuffle(withoutLast.length > 0 ? withoutLast : deduped);
+  }
+
+  async rememberRandomStation(preset, station, label) {
+    if (typeof this.setStoreValue === "function") {
+      await this.setStoreValue(`preset${preset}_last_station_name`, normalizeString(station.name));
+      await this.setStoreValue(`preset${preset}_last_station_url`, normalizeString(station.streamUrl));
+      await this.setStoreValue(`preset${preset}_last_station_uuid`, normalizeString(station.stationuuid));
+    }
+    await this.setDiagnostic("last_random_station", `${label}: ${normalizeString(station.name) || station.streamUrl}`);
+  }
+
+  async playRandomPreset(preset, { source = "Homey", settings = this.getSettings() } = {}) {
+    const label = this.getPresetName(preset, settings);
+    const rule = this.getRandomPresetRule(preset, settings);
+    if (!rule.tag) {
+      await this.recordPlaybackError(`Random preset ${preset} has no tag configured.`, { warning: false });
+      return;
+    }
+
+    const lastStation = this.getLastRandomStation(preset);
+    let searchResults = [];
+    let searchError = null;
+    try {
+      const response = await searchRandomCompatibleStations({
+        tag: rule.tag,
+        countrycode: rule.countryEnabled ? rule.countrycode : "",
+      });
+      searchResults = response.results || [];
+      await this.recordAction(`Random preset ${preset} matched ${searchResults.length} station(s) from ${response.source}`);
+    } catch (error) {
+      searchError = error;
+      await this.recordAction(`Random preset ${preset} search failed: ${error.message}`);
+    }
+
+    const candidates = this.getRandomPlaybackCandidates(searchResults, lastStation)
+      .slice(0, RANDOM_PLAYBACK_ATTEMPT_LIMIT);
+    const errors = [];
+
+    for (const station of candidates) {
+      try {
+        await this.recordAction(`Random preset ${preset} selected ${station.name || station.streamUrl}`);
+        await this.playStream(station.streamUrl, {
+          presetNumber: preset,
+          source: `${source} random preset`,
+          title: station.name || label,
+          albumArtUrl: station.favicon || "",
+        });
+        await this.rememberRandomStation(preset, station, label);
+        await this.syncNativePresetNames();
+        countStationClick(station.stationuuid).catch((error) => {
+          this.log(`Could not count Radio Browser station click: ${error.message}`);
+        });
+        return;
+      } catch (error) {
+        const message = error.details || error.message;
+        errors.push(`${station.name || station.streamUrl}: ${message}`);
+        await this.recordAction(`Random preset ${preset} failed ${station.name || station.streamUrl}: ${message}`);
+      }
+    }
+
+    if (lastStation) {
+      try {
+        await this.recordAction(`Random preset ${preset} falling back to last station ${lastStation.name || lastStation.streamUrl}`);
+        await this.playStream(lastStation.streamUrl, {
+          presetNumber: preset,
+          source: `${source} random preset fallback`,
+          title: lastStation.name || label,
+        });
+        await this.setDiagnostic("last_random_station", `${label}: ${lastStation.name || lastStation.streamUrl}`);
+        return;
+      } catch (error) {
+        errors.push(`last station fallback: ${error.details || error.message}`);
+      }
+    }
+
+    const reason = searchError && searchResults.length === 0
+      ? searchError.message
+      : (errors.join(" | ") || "No compatible stations matched this random preset rule.");
+    await this.recordPlaybackError(`Random preset ${preset} could not start: ${reason}`);
   }
 
   async turnOn() {

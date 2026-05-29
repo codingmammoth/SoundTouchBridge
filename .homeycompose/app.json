@@ -1,6 +1,6 @@
 {
   "id": "com.codingmammoth.soundtouchbridge",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "compatibility": ">=5.0.0",
   "platforms": [
     "local"
@@ -45,6 +45,10 @@
     "searchStations": {
       "method": "POST",
       "path": "/stations/search"
+    },
+    "testRandomPreset": {
+      "method": "POST",
+      "path": "/presets/random/test"
     },
     "savePreset": {
       "method": "POST",
