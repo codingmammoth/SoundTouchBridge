@@ -97,6 +97,7 @@
         border-color: var(--disabled);
         background: var(--disabled);
         color: var(--primary-text);
+        opacity: 0.58;
       }
 
       .section {
@@ -205,8 +206,47 @@
         overflow: auto;
       }
 
+      .mode-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 0 0 14px;
+      }
+
+      .mode-toggle button {
+        position: relative;
+        border-color: var(--border);
+        background: var(--secondary);
+        color: var(--secondary-text);
+        box-shadow: none;
+      }
+
+      .mode-toggle button.active {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: var(--primary-text);
+        box-shadow: inset 0 0 0 1px var(--primary);
+      }
+
+      .mode-toggle button.active::after {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary-text);
+        content: "";
+        transform: translateY(-50%);
+      }
+
+      .panel.hidden {
+        display: none;
+      }
+
       .search-grid,
-      .manual-grid {
+      .manual-grid,
+      .random-grid {
         display: grid;
         grid-template-columns: 1fr 90px 1fr auto;
         gap: 8px;
@@ -216,6 +256,36 @@
       .manual-grid {
         grid-template-columns: 1fr 2fr;
         margin-top: 14px;
+      }
+
+      .random-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .country-row {
+        display: grid;
+        grid-template-columns: auto minmax(88px, 120px);
+        gap: 10px;
+        align-items: end;
+      }
+
+      .country-toggle {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        min-height: 40px;
+        margin: 0;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .country-toggle input {
+        width: auto;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        accent-color: var(--success);
       }
 
       .results {
@@ -281,6 +351,10 @@
         color: #fff;
       }
 
+      .station.sample {
+        pointer-events: none;
+      }
+
       .modal-help {
         margin: 0 0 14px;
         color: var(--muted);
@@ -340,7 +414,9 @@
       @media (max-width: 720px) {
         .preset-row,
         .search-grid,
-        .manual-grid {
+        .manual-grid,
+        .random-grid,
+        .country-row {
           grid-template-columns: 1fr;
         }
 
@@ -401,36 +477,73 @@
           <span id="modal-status" class="status"></span>
         </div>
         <div class="dialog-body">
-          <p class="modal-help">Search for an existing radio station, or add a direct http:// stream URL at the bottom.</p>
-
-          <div class="search-grid">
-            <div>
-              <label for="query">Station</label>
-              <input id="query" type="search" autocomplete="off" placeholder="BBC, KEXP, FIP">
-            </div>
-            <div>
-              <label for="countrycode">Country</label>
-              <input id="countrycode" maxlength="2" autocapitalize="characters" placeholder="BE">
-            </div>
-            <div>
-              <label for="tag">Tag</label>
-              <input id="tag" autocomplete="off" placeholder="news, jazz, rock">
-            </div>
-            <button id="search">Search</button>
+          <div class="mode-toggle" role="group" aria-label="Preset type">
+            <button id="mode-fixed" type="button" class="active" aria-pressed="true">Specific station</button>
+            <button id="mode-random" type="button" aria-pressed="false">Random radio</button>
           </div>
 
-          <div id="results" class="results">
-            <div class="empty">Search for a radio station.</div>
+          <div id="fixed-panel" class="panel">
+            <p class="modal-help">Search for an existing radio station, or add a direct http:// stream URL at the bottom.</p>
+
+            <div class="search-grid">
+              <div>
+                <label for="query">Station</label>
+                <input id="query" type="search" autocomplete="off" placeholder="BBC, KEXP, FIP">
+              </div>
+              <div>
+                <label for="countrycode">Country</label>
+                <input id="countrycode" maxlength="2" autocapitalize="characters" placeholder="BE">
+              </div>
+              <div>
+                <label for="tag">Tag</label>
+                <input id="tag" autocomplete="off" placeholder="news, jazz, rock">
+              </div>
+              <button id="search">Search</button>
+            </div>
+
+            <div id="results" class="results">
+              <div class="empty">Search for a radio station.</div>
+            </div>
+
+            <div class="manual-grid">
+              <div>
+                <label for="manual-name">Name</label>
+                <input id="manual-name" autocomplete="off">
+              </div>
+              <div>
+                <label for="manual-url">Stream URL</label>
+                <input id="manual-url" autocomplete="off" placeholder="http://example.com/stream.mp3">
+              </div>
+            </div>
           </div>
 
-          <div class="manual-grid">
-            <div>
-              <label for="manual-name">Name</label>
-              <input id="manual-name" autocomplete="off">
+          <div id="random-panel" class="panel hidden">
+            <p class="modal-help">Save a rule such as Random Dance. Each preset press searches compatible Radio Browser streams and starts one match.</p>
+
+            <div class="random-grid">
+              <div>
+                <label for="random-label">Preset name</label>
+                <input id="random-label" autocomplete="off" placeholder="Random Dance">
+              </div>
+              <div>
+                <label for="random-tag">Tag or genre</label>
+                <input id="random-tag" autocomplete="off" placeholder="dance, techno, news">
+              </div>
+              <div class="country-row">
+                <label class="country-toggle">
+                  <input id="random-country-enabled" type="checkbox">
+                  <span>Filter by country</span>
+                </label>
+                <div>
+                  <label for="random-countrycode">Country</label>
+                  <input id="random-countrycode" maxlength="2" autocapitalize="characters" placeholder="BE" disabled>
+                </div>
+              </div>
+              <button id="random-test" type="button">Test matches</button>
             </div>
-            <div>
-              <label for="manual-url">Stream URL</label>
-              <input id="manual-url" autocomplete="off" placeholder="http://example.com/stream.mp3">
+
+            <div id="random-results" class="results">
+              <div class="empty">Enter a tag, then test matches.</div>
             </div>
           </div>
         </div>
@@ -469,17 +582,30 @@
         var devices = [];
         var activePreset = null;
         var selectedStation = null;
+        var presetMode = "fixed";
+        var randomRuleTested = false;
+        var randomLabelAuto = true;
 
         var deviceSelect = document.getElementById("device");
         var presetsEl = document.getElementById("presets");
         var modalEl = document.getElementById("modal");
         var modalTitleEl = document.getElementById("modal-title");
         var modalStatusEl = document.getElementById("modal-status");
+        var fixedPanelEl = document.getElementById("fixed-panel");
+        var randomPanelEl = document.getElementById("random-panel");
+        var modeFixedButton = document.getElementById("mode-fixed");
+        var modeRandomButton = document.getElementById("mode-random");
         var searchButton = document.getElementById("search");
         var assignButton = document.getElementById("assign");
         var resultsEl = document.getElementById("results");
         var manualNameEl = document.getElementById("manual-name");
         var manualUrlEl = document.getElementById("manual-url");
+        var randomLabelEl = document.getElementById("random-label");
+        var randomTagEl = document.getElementById("random-tag");
+        var randomCountryEnabledEl = document.getElementById("random-country-enabled");
+        var randomCountryCodeEl = document.getElementById("random-countrycode");
+        var randomTestButton = document.getElementById("random-test");
+        var randomResultsEl = document.getElementById("random-results");
         var debugButton = document.getElementById("debug-info");
         var debugModalEl = document.getElementById("debug-modal");
         var debugListEl = document.getElementById("debug-list");
@@ -514,6 +640,27 @@
             return text;
           }
           return text.slice(0, NAME_MAX_LENGTH - 3).trim() + "...";
+        }
+
+        function normalizeCountryCode(value) {
+          return String(value == null ? "" : value).trim().toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
+        }
+
+        function labelCase(value) {
+          var text = String(value == null ? "" : value).trim();
+          return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Radio";
+        }
+
+        function getRandomRuleLabel() {
+          var tag = labelCase(randomTagEl.value);
+          var country = randomCountryEnabledEl.checked ? normalizeCountryCode(randomCountryCodeEl.value) : "";
+          return country ? "Random " + tag + " (" + country + ")" : "Random " + tag;
+        }
+
+        function syncRandomLabel() {
+          if (randomLabelAuto) {
+            randomLabelEl.value = randomTagEl.value.trim() ? truncateName(getRandomRuleLabel()) : "";
+          }
         }
 
         function getSelectedDevice() {
@@ -561,15 +708,29 @@
           }
 
           presets.forEach(function (preset) {
-            var isAssigned = Boolean(preset.url);
+            var isRandom = preset.mode === "random";
+            var isAssigned = isRandom ? Boolean(preset.random && preset.random.tag) : Boolean(preset.url);
             var row = document.createElement("div");
-            var displayName = isAssigned ? truncateName(preset.name) : "Not assigned";
+            var displayFullName = isAssigned ? (preset.label || preset.name || "") : "Not assigned";
+            var displayName = truncateName(displayFullName);
+            var subtitle = "Assign a radio station";
+            if (isAssigned && isRandom) {
+              subtitle = "Random: " + preset.random.tag;
+              if (preset.random.countryEnabled && preset.random.countrycode) {
+                subtitle += " (" + preset.random.countrycode + ")";
+              }
+              if (preset.lastStation && preset.lastStation.name) {
+                subtitle += " | Last: " + truncateName(preset.lastStation.name);
+              }
+            } else if (isAssigned) {
+              subtitle = "Specific station";
+            }
             row.className = "preset-row";
-            row.title = isAssigned ? preset.name : "";
+            row.title = isAssigned ? displayFullName : "";
             row.innerHTML = '<div>'
               + '<span class="preset-title">Preset ' + escapeHtml(preset.preset) + ': '
               + escapeHtml(displayName) + '</span>'
-              + '<span class="preset-subtitle">' + escapeHtml(isAssigned ? "Ready" : "Assign a radio station") + '</span>'
+              + '<span class="preset-subtitle">' + escapeHtml(subtitle) + '</span>'
               + '</div>';
 
             var actions = document.createElement("div");
@@ -588,23 +749,68 @@
           });
         }
 
+        function setPresetMode(mode, shouldFocus) {
+          presetMode = mode === "random" ? "random" : "fixed";
+          if (presetMode === "random") {
+            clearSelectedStation();
+          }
+          fixedPanelEl.classList.toggle("hidden", presetMode !== "fixed");
+          randomPanelEl.classList.toggle("hidden", presetMode !== "random");
+          modeFixedButton.classList.toggle("active", presetMode === "fixed");
+          modeRandomButton.classList.toggle("active", presetMode === "random");
+          modeFixedButton.setAttribute("aria-pressed", presetMode === "fixed" ? "true" : "false");
+          modeRandomButton.setAttribute("aria-pressed", presetMode === "random" ? "true" : "false");
+          updateAssignState();
+          if (shouldFocus) {
+            setTimeout(function () {
+              if (presetMode === "random") {
+                randomTagEl.focus();
+              } else {
+                document.getElementById("query").focus();
+              }
+            }, 0);
+          }
+        }
+
         function openModal(presetNumber, clearFields) {
           var device = getSelectedDevice();
           var preset = getPreset(device, presetNumber);
+          var isRandom = preset && preset.mode === "random";
+          var randomSettings = preset && preset.random ? preset.random : {};
+          var existingRandomLabel;
           activePreset = presetNumber;
           selectedStation = null;
-          modalTitleEl.textContent = (preset && preset.url ? "Edit preset " : "Assign preset ") + presetNumber;
+          randomRuleTested = false;
+          randomLabelAuto = true;
+          modalTitleEl.textContent = (preset && (preset.url || isRandom) ? "Edit preset " : "Assign preset ") + presetNumber;
           modalStatusEl.textContent = "";
           resultsEl.innerHTML = '<div class="empty">Search for a radio station.</div>';
+          randomResultsEl.innerHTML = '<div class="empty">Enter a tag, then test matches.</div>';
           document.getElementById("query").value = "";
           document.getElementById("countrycode").value = "";
           document.getElementById("tag").value = "";
-          manualNameEl.value = clearFields ? "" : (preset && preset.name ? preset.name : "");
-          manualUrlEl.value = clearFields ? "" : (preset && preset.url ? preset.url : "");
-          assignButton.disabled = !manualNameEl.value || !manualUrlEl.value;
+          manualNameEl.value = clearFields || isRandom ? "" : (preset && preset.name ? preset.name : "");
+          manualUrlEl.value = clearFields || isRandom ? "" : (preset && preset.url ? preset.url : "");
+          randomTagEl.value = clearFields || !isRandom ? "" : (randomSettings.tag || "");
+          randomCountryEnabledEl.checked = !clearFields && isRandom && !!randomSettings.countryEnabled;
+          randomCountryCodeEl.value = clearFields || !isRandom ? "" : (randomSettings.countrycode || "");
+          randomCountryCodeEl.disabled = !randomCountryEnabledEl.checked;
+          existingRandomLabel = clearFields || !isRandom ? "" : (preset.label || preset.name || "");
+          randomLabelEl.value = existingRandomLabel;
+          randomLabelAuto = !existingRandomLabel || existingRandomLabel === truncateName(getRandomRuleLabel());
+          syncRandomLabel();
+          randomRuleTested = isRandom && Number(randomSettings.matchCount) > 0;
+          if (randomRuleTested) {
+            randomResultsEl.innerHTML = '<div class="empty">Last test found ' + escapeHtml(randomSettings.matchCount) + ' compatible stream(s). Test again after changing the rule.</div>';
+          }
+          setPresetMode(isRandom ? "random" : "fixed", false);
           modalEl.classList.add("open");
           setTimeout(function () {
-            document.getElementById("query").focus();
+            if (isRandom) {
+              randomTagEl.focus();
+            } else {
+              document.getElementById("query").focus();
+            }
           }, 0);
         }
 
@@ -614,12 +820,17 @@
           selectedStation = null;
         }
 
-        function setSelectedStation(station, button) {
+        function clearSelectedStation() {
           var selected = resultsEl.querySelectorAll(".selected");
           for (var index = 0; index < selected.length; index += 1) {
             selected[index].classList.remove("selected");
             selected[index].setAttribute("aria-pressed", "false");
           }
+          selectedStation = null;
+        }
+
+        function setSelectedStation(station, button) {
+          clearSelectedStation();
           button.classList.add("selected");
           button.setAttribute("aria-pressed", "true");
           selectedStation = station;
@@ -660,6 +871,30 @@
           });
         }
 
+        function renderRandomSamples(results) {
+          randomResultsEl.innerHTML = "";
+
+          if (!results || results.length === 0) {
+            randomResultsEl.innerHTML = '<div class="empty">No compatible HTTP streams found.</div>';
+            return;
+          }
+
+          results.forEach(function (station) {
+            var row = document.createElement("div");
+            var details = [];
+            row.className = "station sample";
+            row.title = station.name || "";
+            if (station.countrycode) details.push(station.countrycode);
+            if (station.codec) details.push(station.codec);
+            if (station.bitrate) details.push(station.bitrate + " kbps");
+            row.innerHTML = '<strong class="station-name">'
+              + '<span class="station-label">' + escapeHtml(truncateName(station.name)) + '</span>'
+              + '</strong>'
+              + '<span class="station-meta">' + escapeHtml(details.join(" | ")) + '</span>';
+            randomResultsEl.appendChild(row);
+          });
+        }
+
         function refreshDevices() {
           return api("GET", "/preset-devices").then(function (response) {
             devices = response || [];
@@ -676,6 +911,9 @@
         }
 
         function searchStations() {
+          if (presetMode !== "fixed") {
+            return;
+          }
           searchButton.disabled = true;
           assignButton.disabled = true;
           modalStatusEl.textContent = "Searching compatible streams...";
@@ -698,20 +936,74 @@
           });
         }
 
+        function testRandomPreset() {
+          var countrycode = normalizeCountryCode(randomCountryCodeEl.value);
+          if (!randomTagEl.value.trim()) {
+            Homey.alert("Enter a tag or genre first.");
+            return;
+          }
+          if (randomCountryEnabledEl.checked && countrycode.length !== 2) {
+            Homey.alert("Enter a two-letter country code, or turn off country filtering.");
+            return;
+          }
+
+          randomRuleTested = false;
+          randomTestButton.disabled = true;
+          assignButton.disabled = true;
+          modalStatusEl.textContent = "Testing random rule...";
+          randomResultsEl.innerHTML = '<div class="empty">Testing matches...</div>';
+
+          api("POST", "/presets/random/test", {
+            tag: randomTagEl.value,
+            countryEnabled: randomCountryEnabledEl.checked,
+            countrycode: countrycode,
+          }).then(function (response) {
+            randomRuleTested = response.matchCount > 0;
+            renderRandomSamples(response.results);
+            modalStatusEl.textContent = response.matchCount + " compatible stream(s) from " + response.source + ".";
+            if (!randomRuleTested) {
+              randomResultsEl.innerHTML = '<div class="empty">No compatible streams matched this rule.</div>';
+            }
+          }).catch(function (error) {
+            randomRuleTested = false;
+            randomResultsEl.innerHTML = '<div class="empty">Could not test this random rule.</div>';
+            modalStatusEl.textContent = "";
+            Homey.alert(error.message || String(error));
+          }).then(function () {
+            randomTestButton.disabled = false;
+            updateAssignState();
+          });
+        }
+
         function assignPreset() {
           var device = getSelectedDevice();
+          var payload;
           if (!device || !activePreset) {
+            return;
+          }
+          if (presetMode === "random" && !randomRuleTested) {
+            Homey.alert("Test the random rule before saving.");
             return;
           }
 
           assignButton.disabled = true;
           modalStatusEl.textContent = "Saving preset...";
-          api("PUT", "/presets", {
+          payload = {
             deviceId: device.id,
             preset: activePreset,
-            name: manualNameEl.value,
-            streamUrl: manualUrlEl.value,
-          }).then(function (response) {
+            mode: presetMode,
+          };
+          if (presetMode === "random") {
+            payload.name = randomLabelEl.value.trim() || getRandomRuleLabel();
+            payload.tag = randomTagEl.value;
+            payload.countryEnabled = randomCountryEnabledEl.checked;
+            payload.countrycode = normalizeCountryCode(randomCountryCodeEl.value);
+          } else {
+            payload.name = manualNameEl.value;
+            payload.streamUrl = manualUrlEl.value;
+          }
+
+          api("PUT", "/presets", payload).then(function (response) {
             updateDevicePresets(response);
             closeModal();
           }).catch(function (error) {
@@ -721,17 +1013,52 @@
           });
         }
 
+        function setSaveButton(disabled, label) {
+          assignButton.disabled = disabled;
+          assignButton.textContent = label || "Save";
+        }
+
         function updateAssignState() {
-          if (selectedStation) {
-            var selected = resultsEl.querySelectorAll(".selected");
-            for (var index = 0; index < selected.length; index += 1) {
-              selected[index].classList.remove("selected");
-              selected[index].setAttribute("aria-pressed", "false");
+          var randomCountryValid;
+          if (presetMode === "random") {
+            randomCountryCodeEl.disabled = !randomCountryEnabledEl.checked;
+            randomCountryValid = !randomCountryEnabledEl.checked || normalizeCountryCode(randomCountryCodeEl.value).length === 2;
+            randomTestButton.disabled = !randomTagEl.value.trim() || !randomCountryValid;
+            if (!randomTagEl.value.trim()) {
+              setSaveButton(true, "Enter tag first");
+            } else if (!randomCountryValid) {
+              setSaveButton(true, "Check country");
+            } else if (!randomRuleTested) {
+              setSaveButton(true, "Test matches first");
+            } else if (!randomLabelEl.value.trim()) {
+              setSaveButton(true, "Enter name first");
+            } else {
+              setSaveButton(false, "Save");
             }
+            return;
+          }
+
+          if (selectedStation) {
+            clearSelectedStation();
             selectedStation = null;
             modalStatusEl.textContent = "Custom stream details. Review the fields below, then save.";
           }
-          assignButton.disabled = !manualNameEl.value.trim() || !manualUrlEl.value.trim();
+          setSaveButton(!manualNameEl.value.trim() || !manualUrlEl.value.trim(), "Save");
+        }
+
+        function onRandomRuleChanged() {
+          randomCountryCodeEl.value = normalizeCountryCode(randomCountryCodeEl.value);
+          syncRandomLabel();
+          randomRuleTested = false;
+          randomResultsEl.innerHTML = '<div class="empty">Test matches before saving this random preset.</div>';
+          modalStatusEl.textContent = "";
+          updateAssignState();
+        }
+
+        function onRandomLabelChanged() {
+          randomLabelAuto = !randomLabelEl.value.trim();
+          syncRandomLabel();
+          updateAssignState();
         }
 
         function renderDiagnostics(data) {
@@ -803,7 +1130,14 @@
         }
 
         function onReady() {
+          modeFixedButton.addEventListener("click", function () {
+            setPresetMode("fixed", true);
+          });
+          modeRandomButton.addEventListener("click", function () {
+            setPresetMode("random", true);
+          });
           searchButton.addEventListener("click", searchStations);
+          randomTestButton.addEventListener("click", testRandomPreset);
           assignButton.addEventListener("click", assignPreset);
           document.getElementById("cancel").addEventListener("click", closeModal);
           debugButton.addEventListener("click", openDebugModal);
@@ -818,9 +1152,18 @@
           deviceSelect.addEventListener("change", renderPresets);
           manualNameEl.addEventListener("input", updateAssignState);
           manualUrlEl.addEventListener("input", updateAssignState);
+          randomLabelEl.addEventListener("input", onRandomLabelChanged);
+          randomTagEl.addEventListener("input", onRandomRuleChanged);
+          randomCountryEnabledEl.addEventListener("change", onRandomRuleChanged);
+          randomCountryCodeEl.addEventListener("input", onRandomRuleChanged);
           document.getElementById("query").addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
               searchStations();
+            }
+          });
+          randomTagEl.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+              testRandomPreset();
             }
           });
           modalEl.addEventListener("click", function (event) {
