@@ -3,6 +3,9 @@
 SoundTouch Bridge is a Homey Pro app that revives useful physical preset
 buttons on Bose SoundTouch speakers after Bose's SoundTouch cloud shutdown.
 
+The app is available for free in the Homey App Store:
+https://homey.app/a/com.codingmammoth.soundtouchbridge/
+
 The intended approach is local-only:
 
 1. Discover Bose SoundTouch speakers on the LAN.
@@ -16,7 +19,12 @@ online. Homey Pro acts as the always-on local bridge.
 
 ## Current Status
 
-Development build, preparing for Homey beta publishing.
+Published as a free Homey app:
+https://homey.app/a/com.codingmammoth.soundtouchbridge/
+
+For normal use, install it from the Homey App Store, add a SoundTouch Bridge
+device, and select a discovered Bose SoundTouch speaker. The developer flow
+below is only needed when testing local changes from this repository.
 
 Validated manually against a Bose SoundTouch 20:
 

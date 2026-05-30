@@ -10,6 +10,25 @@ The app does not try to replace the Bose cloud. It listens for local SoundTouch
 events, syncs native preset labels for display, and starts playback through the
 speaker's UPnP AVTransport endpoint.
 
+## Coding Workflow
+
+- Work ticket-first. Do not make code changes unless there is a GitHub issue or
+  another explicit ticket that defines the work.
+- Create a new branch for each ticket before changing files. Use a descriptive
+  branch name that includes the ticket number, for example
+  `codex/13-random-radio-presets`.
+- Keep each branch scoped to one ticket. If new work appears while implementing,
+  file or request a follow-up ticket instead of expanding the branch silently.
+- When the ticket implementation is done, commit the work and open a pull
+  request that references the ticket.
+- Test every pull request before merge. Prefer automated checks such as
+  `npm test` and `npx homey app validate`; add manual Homey/speaker testing notes
+  when hardware behavior cannot be fully automated.
+- Do not consider work complete until the pull request has test evidence and is
+  ready to merge.
+- Close tickets only after the related pull request is closed or merged. If a PR
+  is abandoned, leave the ticket open or update it with the remaining work.
+
 ## Architecture
 
 - Homey SDK: SDK v3, CommonJS modules.
