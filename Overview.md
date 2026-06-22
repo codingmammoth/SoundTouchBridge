@@ -123,6 +123,11 @@ The app tracks:
 - current source
 - connection state
 - Wi-Fi signal summary when available
+- WebSocket connection and heartbeat status
+- last preset event source
+- last playback source, trace, UPnP phase, verification result, and now-playing
+  response
+- last playback error
 - last raw WebSocket event when debug logging is enabled
 
 ## Pairing Icon
