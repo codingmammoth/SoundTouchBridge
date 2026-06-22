@@ -174,6 +174,86 @@ The app filters search results to currently working, non-HLS MP3/AAC stations
 and saves only direct plain-HTTP stream URLs that pass a quick compatibility
 probe. Manual URL settings remain available for advanced use.
 
+## Publishing a Homey Release
+
+Use the normal ticket/branch/PR workflow for release preparation too. Version
+bumps, release notes, and publishing fixes should be traceable to a GitHub
+issue and reviewed through a pull request before the final publish.
+
+Before publishing:
+
+1. Start from a clean, up-to-date `main`.
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   ```
+
+2. Create an issue branch for the release work.
+
+   ```bash
+   git switch -c codex/<issue-number>-release-<version>
+   ```
+
+3. Update the Homey app version. Use a semver value such as `1.0.0`, or
+   `patch`, `minor`, or `major`.
+
+   ```bash
+   npx homey app version 1.0.0
+   ```
+
+   Do not use `--commit` during the normal PR workflow; keep the generated
+   changes visible in the pull request. The command updates the Homey app
+   metadata and version files that Homey expects for publishing.
+
+4. Add App Store release notes. The Homey CLI supports localized changelog
+   text when bumping the version:
+
+   ```bash
+   npx homey app version 1.0.0 --changelog.en "Improve SoundTouch reconnect reliability and diagnostics."
+   ```
+
+   If you already bumped the version without release notes, add the changelog in
+   Homey Developer Tools during submission or rerun the version step only when
+   it is safe to update the same release metadata.
+
+5. Run the local checks.
+
+   ```bash
+   npm test
+   npx homey app validate
+   ```
+
+6. Build the app package that will be submitted to Homey.
+
+   ```bash
+   npx homey app build
+   ```
+
+   This also refreshes generated Homey output. If you edited compose files,
+   make sure the generated `app.json` stays in sync and include it in the PR.
+
+7. Open a pull request against `main` with:
+
+   - the version bump
+   - release notes/changelog text
+   - validation output
+   - any manual Homey/speaker test notes
+
+8. After the PR is merged and `main` is clean, publish from `main`.
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   npx homey app validate
+   npx homey app build
+   npx homey app publish
+   ```
+
+9. After publishing, confirm the submitted version in Homey Developer Tools and
+   keep the related GitHub issue updated. Only close the release issue after the
+   submission is accepted or the remaining follow-up is tracked elsewhere.
+
 The first development goal is to capture the exact WebSocket payload emitted by
 the speaker when each physical preset button is pressed.
 
