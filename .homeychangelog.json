@@ -22,5 +22,8 @@
   },
   "0.4.2": {
     "en": "New driver image: a clean line-art illustration of the speaker on a white background. The App Store images use the same illustration on the dark gradient for a consistent look. Refined the driver icon so it clearly reads as a speaker."
+  },
+  "1.0.0": {
+    "en": "New in 1.0: random radio presets, more reliable reconnects after speaker or network changes, clearer playback diagnostics, a delete-time crash fix, and updated SoundTouch speaker imagery."
   }
 }
