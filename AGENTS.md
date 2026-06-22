@@ -10,24 +10,54 @@ The app does not try to replace the Bose cloud. It listens for local SoundTouch
 events, syncs native preset labels for display, and starts playback through the
 speaker's UPnP AVTransport endpoint.
 
-## Coding Workflow
+## SDLC / GitHub Workflow
 
-- Work ticket-first. Do not make code changes unless there is a GitHub issue or
-  another explicit ticket that defines the work.
-- Create a new branch for each ticket before changing files. Use a descriptive
-  branch name that includes the ticket number, for example
-  `codex/13-random-radio-presets`.
-- Keep each branch scoped to one ticket. If new work appears while implementing,
-  file or request a follow-up ticket instead of expanding the branch silently.
-- When the ticket implementation is done, commit the work and open a pull
-  request that references the ticket.
+- GitHub Issues are the source of truth for active work, optional improvements,
+  product decisions, completed work, and historical backlog records.
+- Work ticket-first. Do not make implementation changes unless there is a
+  GitHub issue or another explicit ticket that defines the work.
+- Do not make direct implementation changes on the default branch. Work on one
+  branch per issue unless the user explicitly requests otherwise.
+- Before starting a new issue branch, sync from the latest default branch when
+  the worktree is clean: `git switch main`, `git fetch origin`, and
+  `git pull --ff-only`. This repository uses `main` as its default branch.
+- Agent-created branches should use `codex/<issue-number>-short-description`,
+  for example `codex/13-random-radio-presets`, unless another prefix is
+  requested.
+- Keep each branch and pull request focused on one issue where practical. If new
+  work appears while implementing, file or request a follow-up ticket instead of
+  expanding the branch silently.
+- When one issue depends on, references, or is fixed together with another
+  issue, use the GitHub issue number such as `#20` in issue comments, commit
+  messages, and PR descriptions.
+- When committing work for a specific issue, include the full GitHub issue
+  reference in the commit message, such as
+  `codingmammoth/SoundTouchBridge#12`, so local commits remain traceable before
+  and after push.
+- When work is ready for review, push the issue branch and open a pull request
+  against `main`. Draft PRs are appropriate while user/manual Homey speaker
+  testing is still expected; mark ready only after the user explicitly asks or
+  review is complete.
+- Immediately after creating a PR, verify the base branch with
+  `gh pr view <number> --json baseRefName,headRefName`. If `baseRefName` is not
+  `main`, stop and fix the PR base before continuing.
+- PR descriptions should reference the issue, summarize behavior/docs changes,
+  and include verification notes.
 - Test every pull request before merge. Prefer automated checks such as
-  `npm test` and `npx homey app validate`; add manual Homey/speaker testing notes
-  when hardware behavior cannot be fully automated.
+  `npm test` and `npx homey app validate`; add manual Homey/speaker testing
+  notes when hardware behavior cannot be fully automated.
 - Do not consider work complete until the pull request has test evidence and is
-  ready to merge.
-- Close tickets only after the related pull request is closed or merged. If a PR
-  is abandoned, leave the ticket open or update it with the remaining work.
+  ready for review.
+- When work is done for a specific issue, add a short completion comment on that
+  issue with what changed, why/how it changed, verification performed, and a
+  link to the relevant commit hash or PR.
+- Close tickets only after the related pull request is closed or merged and
+  relevant verification has completed. If a PR is abandoned, leave the ticket
+  open or update it with the remaining work.
+- Stacked PRs are exceptional. Only target a branch other than `main` when the
+  user explicitly agrees to stack the work, document the dependency in the PR
+  body, and retarget/rebase it to `main` before merge if the parent branch has
+  already merged.
 
 ## Architecture
 

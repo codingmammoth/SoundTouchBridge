@@ -27,6 +27,8 @@ const {
 const WEBSOCKET_PORT = 8080;
 const WEBSOCKET_PROTOCOL = "gabbo";
 const RECONNECT_DELAY_MS = 10000;
+const WEBSOCKET_CONNECT_TIMEOUT_MS = 15000;
+const WEBSOCKET_WATCHDOG_INTERVAL_MS = 30000;
 const PRESET_DEBOUNCE_MS = 1500;
 const PLAYBACK_VERIFY_TIMEOUT_MS = 12000;
 const PLAYBACK_VERIFY_INTERVAL_MS = 1500;
@@ -112,6 +114,10 @@ class SoundTouchDevice extends Homey.Device {
   async onInit() {
     this.ws = null;
     this.reconnectTimer = null;
+    this.websocketConnectTimer = null;
+    this.websocketWatchdogTimer = null;
+    this.websocketAwaitingPong = false;
+    this.isDeleted = false;
     this.lastPresetAt = new Map();
     this.activePreset = this.getStoredActivePreset();
     this.connectionState = null;
@@ -135,8 +141,9 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   async onDeleted() {
+    this.isDeleted = true;
     this.clearReconnectTimer();
-    this.closeWebSocket();
+    this.closeWebSocket("Device deleted");
   }
 
   async onSettings({ newSettings, changedKeys }) {
@@ -156,7 +163,7 @@ class SoundTouchDevice extends Homey.Device {
       }
       await this.recordAction(`IP address changed to ${nextAddress}`);
       this.address = nextAddress;
-      this.closeWebSocket();
+      this.closeWebSocket("IP address changed");
       this.connectWebSocket();
     }
   }
@@ -601,41 +608,85 @@ class SoundTouchDevice extends Homey.Device {
   }
 
   connectWebSocket() {
-    if (!this.address) {
+    if (!this.address || this.isDeleted) {
       return;
     }
 
     this.clearReconnectTimer();
-    this.closeWebSocket();
+    this.closeWebSocket("Opening new connection");
 
     const url = `ws://${this.address}:${WEBSOCKET_PORT}`;
     this.log(`Connecting Bose WebSocket ${url}`);
-    this.ws = new WebSocket(url, WEBSOCKET_PROTOCOL);
-
-    this.ws.on("open", async () => {
-      this.log("Bose WebSocket connected");
-      await this.updateWebSocketStatus(`Connected to ${this.address}:${WEBSOCKET_PORT}`);
-      await this.setAvailable();
+    this.updateWebSocketStatus(`Connecting to ${this.address}:${WEBSOCKET_PORT}`).catch((error) => {
+      this.error(`Failed to update WebSocket status: ${error.message}`);
     });
 
-    this.ws.on("message", (message) => {
+    const ws = new WebSocket(url, WEBSOCKET_PROTOCOL);
+    this.ws = ws;
+    this.websocketAwaitingPong = false;
+    this.startWebSocketConnectTimer(ws);
+
+    ws.on("open", async () => {
+      if (this.ws !== ws) {
+        return;
+      }
+
+      this.clearWebSocketConnectTimer();
+      this.log("Bose WebSocket connected");
+      await this.updateWebSocketStatus(`Connected to ${this.address}:${WEBSOCKET_PORT}`);
+      await this.recordWebSocketActivity("WebSocket opened");
+      await this.setAvailable();
+      await this.syncStatus();
+      this.scheduleWebSocketWatchdog(ws);
+    });
+
+    ws.on("message", (message) => {
+      if (this.ws !== ws) {
+        return;
+      }
+
+      this.websocketAwaitingPong = false;
       this.handleWebSocketMessage(message).catch((error) => {
         this.error(`Failed to handle WebSocket message: ${error.message}`);
       });
     });
 
-    this.ws.on("close", () => {
-      this.log("Bose WebSocket closed");
-      this.updateWebSocketStatus("Closed; reconnecting").catch((error) => {
+    ws.on("pong", () => {
+      if (this.ws !== ws) {
+        return;
+      }
+
+      this.websocketAwaitingPong = false;
+      this.recordWebSocketActivity("WebSocket heartbeat pong").catch((error) => {
+        this.error(`Failed to record WebSocket heartbeat: ${error.message}`);
+      });
+    });
+
+    ws.on("close", (code, reasonBuffer) => {
+      if (this.ws !== ws) {
+        return;
+      }
+
+      this.ws = null;
+      this.clearWebSocketConnectTimer();
+      this.clearWebSocketWatchdogTimer();
+      this.websocketAwaitingPong = false;
+      const closeReason = this.formatWebSocketCloseReason(code, reasonBuffer);
+      this.log(`Bose WebSocket closed: ${closeReason}`);
+      this.updateWebSocketStatus(`Closed; reconnecting (${closeReason})`).catch((error) => {
         this.error(`Failed to update WebSocket status: ${error.message}`);
       });
       this.setUnavailable("Speaker connection lost. Reconnecting...").catch((error) => {
         this.error(`Failed to mark speaker unavailable: ${error.message}`);
       });
-      this.scheduleReconnect();
+      this.scheduleReconnect(`closed: ${closeReason}`);
     });
 
-    this.ws.on("error", (error) => {
+    ws.on("error", (error) => {
+      if (this.ws !== ws) {
+        return;
+      }
+
       this.error(`Bose WebSocket error: ${error.message}`);
       this.updateWebSocketStatus(`Error: ${error.message}`).catch((statusError) => {
         this.error(`Failed to update WebSocket status: ${statusError.message}`);
@@ -643,35 +694,57 @@ class SoundTouchDevice extends Homey.Device {
       this.setUnavailable(`Speaker connection error: ${error.message}`).catch((availabilityError) => {
         this.error(`Failed to mark speaker unavailable: ${availabilityError.message}`);
       });
-      if (this.ws) {
-        try {
-          this.ws.terminate();
-        } catch (terminateError) {
-          this.error(`Failed to terminate Bose WebSocket: ${terminateError.message}`);
-        }
-      }
+      this.forceWebSocketReconnect(`error: ${error.message}`);
     });
   }
 
-  closeWebSocket() {
+  closeWebSocket(reason) {
     if (!this.ws) {
       return;
     }
 
     const ws = this.ws;
     this.ws = null;
+    this.websocketAwaitingPong = false;
+    this.clearWebSocketConnectTimer();
+    this.clearWebSocketWatchdogTimer();
     ws.removeAllListeners();
     try {
-      ws.close();
+      if (ws.readyState === WebSocket.CONNECTING) {
+        ws.once("error", () => {});
+        ws.once("close", () => {});
+        ws.terminate();
+      } else if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      } else if (typeof ws.terminate === "function" && ws.readyState !== WebSocket.CLOSED) {
+        ws.terminate();
+      }
     } catch (error) {
-      this.error(`Failed to close WebSocket: ${error.message}`);
+      this.error(`Failed to close WebSocket${reason ? ` (${reason})` : ""}: ${error.message}`);
     }
   }
 
-  scheduleReconnect() {
-    if (this.reconnectTimer || !this.address) {
+  forceWebSocketReconnect(reason) {
+    if (this.isDeleted) {
       return;
     }
+
+    this.closeWebSocket(reason);
+    this.scheduleReconnect(reason);
+  }
+
+  scheduleReconnect(reason) {
+    if (this.reconnectTimer || !this.address || this.isDeleted) {
+      return;
+    }
+
+    const message = reason
+      ? `Reconnecting in ${RECONNECT_DELAY_MS / 1000}s (${reason})`
+      : `Reconnecting in ${RECONNECT_DELAY_MS / 1000}s`;
+    this.log(`Bose WebSocket ${message}`);
+    this.updateWebSocketStatus(message).catch((error) => {
+      this.error(`Failed to update WebSocket status: ${error.message}`);
+    });
 
     this.reconnectTimer = this.homey.setTimeout(() => {
       this.reconnectTimer = null;
@@ -684,6 +757,95 @@ class SoundTouchDevice extends Homey.Device {
       this.homey.clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+  }
+
+  startWebSocketConnectTimer(ws) {
+    this.clearWebSocketConnectTimer();
+    this.websocketConnectTimer = this.homey.setTimeout(() => {
+      this.websocketConnectTimer = null;
+      if (this.ws !== ws || this.isDeleted) {
+        return;
+      }
+      if (ws.readyState === WebSocket.CONNECTING) {
+        this.forceWebSocketReconnect("connect timeout");
+      }
+    }, WEBSOCKET_CONNECT_TIMEOUT_MS);
+  }
+
+  clearWebSocketConnectTimer() {
+    if (this.websocketConnectTimer) {
+      this.homey.clearTimeout(this.websocketConnectTimer);
+      this.websocketConnectTimer = null;
+    }
+  }
+
+  scheduleWebSocketWatchdog(ws) {
+    this.clearWebSocketWatchdogTimer();
+    if (this.ws !== ws || this.isDeleted) {
+      return;
+    }
+
+    this.websocketWatchdogTimer = this.homey.setTimeout(() => {
+      this.websocketWatchdogTimer = null;
+      this.checkWebSocketHealth(ws);
+    }, WEBSOCKET_WATCHDOG_INTERVAL_MS);
+  }
+
+  clearWebSocketWatchdogTimer() {
+    if (this.websocketWatchdogTimer) {
+      this.homey.clearTimeout(this.websocketWatchdogTimer);
+      this.websocketWatchdogTimer = null;
+    }
+  }
+
+  checkWebSocketHealth(ws) {
+    if (this.ws !== ws || this.isDeleted) {
+      return;
+    }
+
+    if (ws.readyState !== WebSocket.OPEN) {
+      this.forceWebSocketReconnect(`watchdog saw ${this.formatWebSocketReadyState(ws.readyState)}`);
+      return;
+    }
+
+    if (this.websocketAwaitingPong) {
+      this.forceWebSocketReconnect("watchdog missed heartbeat pong");
+      return;
+    }
+
+    try {
+      this.websocketAwaitingPong = true;
+      ws.ping();
+      this.updateWebSocketStatus(`Connected to ${this.address}:${WEBSOCKET_PORT}; heartbeat sent`).catch((error) => {
+        this.error(`Failed to update WebSocket status: ${error.message}`);
+      });
+      this.scheduleWebSocketWatchdog(ws);
+    } catch (error) {
+      this.forceWebSocketReconnect(`heartbeat failed: ${error.message}`);
+    }
+  }
+
+  formatWebSocketReadyState(readyState) {
+    if (readyState === WebSocket.CONNECTING) {
+      return "CONNECTING";
+    }
+    if (readyState === WebSocket.OPEN) {
+      return "OPEN";
+    }
+    if (readyState === WebSocket.CLOSING) {
+      return "CLOSING";
+    }
+    if (readyState === WebSocket.CLOSED) {
+      return "CLOSED";
+    }
+    return `readyState ${readyState}`;
+  }
+
+  formatWebSocketCloseReason(code, reasonBuffer) {
+    const reason = reasonBuffer && reasonBuffer.length
+      ? reasonBuffer.toString()
+      : "";
+    return reason ? `${code} ${reason}` : String(code);
   }
 
   async handleWebSocketMessage(message) {
