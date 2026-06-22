@@ -10,6 +10,22 @@ The app does not try to replace the Bose cloud. It listens for local SoundTouch
 events, syncs native preset labels for display, and starts playback through the
 speaker's UPnP AVTransport endpoint.
 
+## Documentation Hygiene
+
+- Keep `README.md`, `Overview.md`, and `AGENTS.md` up to date whenever behavior,
+  architecture, user workflow, publishing workflow, or development process
+  changes.
+- `README.md` should describe the current user-facing app behavior, developer
+  test flow, and Homey publishing flow. Do not leave outdated prototype/version
+  language in README after features ship.
+- `Overview.md` should remain a compact product/architecture summary aligned
+  with the current implementation.
+- `AGENTS.md` should remain the authoritative local workflow guide for agents,
+  including SDLC, compatibility constraints, important files, and recurring
+  project decisions.
+- Use GitHub Issues as the backlog and follow-up system. Do not create a
+  separate local backlog file.
+
 ## SDLC / GitHub Workflow
 
 - GitHub Issues are the source of truth for active work, optional improvements,
