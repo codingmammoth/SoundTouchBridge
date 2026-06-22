@@ -11,7 +11,7 @@ The intended approach is local-only:
 1. Discover Bose SoundTouch speakers on the LAN.
 2. Keep a WebSocket connection to each paired speaker.
 3. Detect physical preset button presses.
-4. Map preset slots to user-configured stream URLs.
+4. Map preset slots to user-configured fixed streams or random radio rules.
 5. Start playback with UPnP AVTransport.
 
 The app should not require Home Assistant, a computer, or a phone to stay
@@ -72,21 +72,25 @@ _soundtouch._tcp
 Manual IP entry should be kept as a fallback for networks where multicast
 discovery is blocked.
 
-## Initial Scope
-
-Version 0.1 supports:
+## Current Features
 
 - one or more paired Bose SoundTouch speakers
 - automatic discovery during pairing
-- six configured preset URLs per speaker
+- six configurable preset slots per speaker
+- fixed radio presets using direct stream URLs
+- random radio presets using a required tag/genre and optional country filter
+- test-before-save random preset matching
 - direct `http://` stream URL validation for presets and Flow playback
-- WebSocket logging of preset button events
+- WebSocket event handling for physical preset button presses
+- heartbeat-based WebSocket reconnect handling after speaker reboot or network
+  changes
 - playback via UPnP AVTransport
 - native SoundTouch preset label sync for the six configured slots
 - Homey device controls for power, stop, volume, and preset buttons
-- useful speaker metadata in device settings: active preset and compact status
-- reconnect logic for WebSocket disconnects
-- clear unavailable state when the speaker or UPnP service is unreachable
+- useful App Settings diagnostics for WebSocket, preset, playback, UPnP, and
+  now-playing state
+- clear warning/unavailable state when the speaker, WebSocket, or UPnP playback
+  path is unreachable
 
 Manual IP fallback and repair/remap flows are planned follow-ups for networks
 where multicast discovery is blocked or speaker IPs change.
@@ -161,12 +165,14 @@ Then:
 3. Select a discovered SoundTouch speaker.
 4. Keep the Homey CLI logs open.
 5. Press physical preset buttons on the speaker.
-6. Enable debug logging and check "Last WebSocket event" only when
-   troubleshooting event payloads.
-7. Open the SoundTouch Bridge app settings to assign, edit, reassign, or remove
-   radio stations for each preset slot. Speaker settings show a read-only preset
-   overview for the selected device.
-8. Create a Flow action for the paired speaker: "Play stream" or
+6. Open SoundTouch Bridge app settings and use the debug modal to inspect
+   WebSocket, preset, playback, UPnP, verification, and now-playing diagnostics.
+7. Enable debug logging and check "Last WebSocket event" only when
+   troubleshooting raw event payloads.
+8. Open SoundTouch Bridge app settings to assign, edit, reassign, or remove
+   fixed radio presets or random radio presets for each preset slot. Speaker
+   settings show a read-only preset overview for the selected device.
+9. Create a Flow action for the paired speaker: "Play stream" or
    "Play configured preset".
 
 Radio station search uses the public Radio Browser API. No API key is needed.
@@ -174,24 +180,112 @@ The app filters search results to currently working, non-HLS MP3/AAC stations
 and saves only direct plain-HTTP stream URLs that pass a quick compatibility
 probe. Manual URL settings remain available for advanced use.
 
-The first development goal is to capture the exact WebSocket payload emitted by
-the speaker when each physical preset button is pressed.
+Random radio presets use a required tag/genre and optional country filter. The
+rule must be tested before saving, and every preset press searches for a
+compatible station, avoids immediate repeats where possible, and falls back to
+the last successful station only when needed.
 
-## Current Prototype Behavior
+## Publishing a Homey Release
 
-The current app prototype:
+Use the normal ticket/branch/PR workflow for release preparation too. Version
+bumps, release notes, and publishing fixes should be traceable to a GitHub
+issue and reviewed through a pull request before the final publish.
+
+Before publishing:
+
+1. Start from a clean, up-to-date `main`.
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   ```
+
+2. Create an issue branch for the release work.
+
+   ```bash
+   git switch -c codex/<issue-number>-release-<version>
+   ```
+
+3. Update the Homey app version. Use a semver value such as `1.0.0`, or
+   `patch`, `minor`, or `major`.
+
+   ```bash
+   npx homey app version 1.0.0
+   ```
+
+   Do not use `--commit` during the normal PR workflow; keep the generated
+   changes visible in the pull request. The command updates the Homey app
+   metadata and version files that Homey expects for publishing.
+
+4. Add App Store release notes. The Homey CLI supports localized changelog
+   text when bumping the version:
+
+   ```bash
+   npx homey app version 1.0.0 --changelog.en "Improve SoundTouch reconnect reliability and diagnostics."
+   ```
+
+   If you already bumped the version without release notes, add the changelog in
+   Homey Developer Tools during submission or rerun the version step only when
+   it is safe to update the same release metadata.
+
+5. Run the local checks.
+
+   ```bash
+   npm test
+   npx homey app validate
+   ```
+
+6. Build the app package that will be submitted to Homey.
+
+   ```bash
+   npx homey app build
+   ```
+
+   This also refreshes generated Homey output. If you edited compose files,
+   make sure the generated `app.json` stays in sync and include it in the PR.
+
+7. Open a pull request against `main` with:
+
+   - the version bump
+   - release notes/changelog text
+   - validation output
+   - any manual Homey/speaker test notes
+
+8. After the PR is merged and `main` is clean, publish from `main`.
+
+   ```bash
+   git switch main
+   git pull --ff-only
+   npx homey app validate
+   npx homey app build
+   npx homey app publish
+   ```
+
+9. After publishing, confirm the submitted version in Homey Developer Tools and
+   keep the related GitHub issue updated. Only close the release issue after the
+   submission is accepted or the remaining follow-up is tracked elsewhere.
+
+## Current Runtime Behavior
+
+The current app:
 
 - discovers speakers with Homey's mDNS-SD discovery strategy for
   `_soundtouch._tcp`
 - verifies each discovered IP with `/info` on port `8090`
 - pairs the selected speaker as a Homey device
 - connects to `ws://<speaker-ip>:8080` using subprotocol `gabbo`
+- monitors the WebSocket with a heartbeat watchdog and reconnects after stale
+  or failed connections
 - logs and stores raw WebSocket events only while debug logging is enabled
-- stores active preset and compact connection/source metadata in device settings
+- stores active preset and compact connection/source metadata
+- stores structured App Settings diagnostics for the last preset event, playback
+  source, playback trace, UPnP phase, verification result, now-playing payload,
+  and playback error
 - syncs native SoundTouch preset names through `/storePreset` so the speaker
   display matches the configured Homey preset name
 - triggers a Homey Flow card when a preset event is detected
-- maps physical preset 1 through 6 to configured stream URLs
+- maps physical preset 1 through 6 to configured fixed streams or random radio
+  rules
 - updates dashboard preset button titles from the configured preset names and
   marks the active preset as playing
 - provides a Flow action to play a configured preset slot
@@ -206,7 +300,7 @@ The preset parser is intentionally broad until we capture real events from more
 speakers. It looks for common forms such as `PRESET_1`, `preset1`, and
 `<preset id="1">`.
 
-## Non-Goals For The First Version
+## Non-Goals
 
 - replacing the Bose cloud
 - editing firmware or SSH configuration on speakers
