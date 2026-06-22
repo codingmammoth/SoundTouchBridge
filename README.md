@@ -187,8 +187,8 @@ the last successful station only when needed.
 
 ## Publishing a Homey Release
 
-Use the normal ticket/branch/PR workflow for release preparation too. Version
-bumps, release notes, and publishing fixes should be traceable to a GitHub
+Use the normal ticket/branch/PR workflow for release preparation too. Code,
+asset, documentation, and publishing fixes should be traceable to a GitHub
 issue and reviewed through a pull request before the final publish.
 
 Before publishing:
@@ -200,70 +200,48 @@ Before publishing:
    git pull --ff-only
    ```
 
-2. Create an issue branch for the release work.
+2. If the release needs code, asset, or documentation changes, create an issue
+   branch, make the changes, run checks, and merge the pull request first.
 
    ```bash
-   git switch -c codex/<issue-number>-release-<version>
+   git switch -c codex/<issue-number>-short-description
    ```
 
-3. Update the Homey app version. Use a semver value such as `1.0.0`, or
-   `patch`, `minor`, or `major`.
-
-   ```bash
-   npx homey app version 1.0.0
-   ```
-
-   Do not use `--commit` during the normal PR workflow; keep the generated
-   changes visible in the pull request. The command updates the Homey app
-   metadata and version files that Homey expects for publishing.
-
-4. Add App Store release notes. The Homey CLI supports localized changelog
-   text when bumping the version:
-
-   ```bash
-   npx homey app version 1.0.0 --changelog.en "Improve SoundTouch reconnect reliability and diagnostics."
-   ```
-
-   If you already bumped the version without release notes, add the changelog in
-   Homey Developer Tools during submission or rerun the version step only when
-   it is safe to update the same release metadata.
-
-5. Run the local checks.
+3. Run the local checks from the release branch or final `main`.
 
    ```bash
    npm test
    npx homey app validate
    ```
 
-6. Build the app package that will be submitted to Homey.
-
-   ```bash
-   npx homey app build
-   ```
-
-   This also refreshes generated Homey output. If you edited compose files,
-   make sure the generated `app.json` stays in sync and include it in the PR.
-
-7. Open a pull request against `main` with:
-
-   - the version bump
-   - release notes/changelog text
-   - validation output
-   - any manual Homey/speaker test notes
-
-8. After the PR is merged and `main` is clean, publish from `main`.
+4. After the PR is merged and `main` is clean, publish from `main`.
 
    ```bash
    git switch main
    git pull --ff-only
-   npx homey app validate
-   npx homey app build
    npx homey app publish
    ```
 
-9. After publishing, confirm the submitted version in Homey Developer Tools and
-   keep the related GitHub issue updated. Only close the release issue after the
-   submission is accepted or the remaining follow-up is tracked elsewhere.
+   The Homey CLI asks whether to update the app version, lets you choose the
+   next patch/minor/major version, asks for the release note/changelog when it
+   is missing, validates the app, uploads a build, and prints the Homey
+   Developer Tools URL for that build.
+
+5. If the CLI changed the version or changelog and asks to commit those files,
+   commit them and push the release commit and tag so GitHub matches the
+   submitted build.
+
+   ```bash
+   git push
+   git push --tags
+   ```
+
+6. In Homey Developer Tools, open the uploaded build, publish it as a Test
+   version, install and verify the Test version, then submit it for
+   certification when it is ready.
+
+7. Keep the related GitHub issue updated. Only close the release issue after
+   the submission is accepted or the remaining follow-up is tracked elsewhere.
 
 ## Current Runtime Behavior
 
