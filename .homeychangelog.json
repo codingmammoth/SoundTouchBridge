@@ -25,5 +25,8 @@
   },
   "1.0.0": {
     "en": "New in 1.0: random radio presets, more reliable reconnects after speaker or network changes, clearer playback diagnostics, a delete-time crash fix, and updated SoundTouch speaker imagery."
+  },
+  "1.0.1": {
+    "en": "Adding link to Homey Forum thread"
   }
 }
