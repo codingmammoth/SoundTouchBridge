@@ -51,9 +51,11 @@ speaker's UPnP AVTransport endpoint.
   `codingmammoth/SoundTouchBridge#12`, so local commits remain traceable before
   and after push.
 - When work is ready for review, push the issue branch and open a pull request
-  against `main`. Draft PRs are appropriate while user/manual Homey speaker
-  testing is still expected; mark ready only after the user explicitly asks or
-  review is complete.
+  against `main`. Draft PRs are appropriate only while work is not yet
+  reviewable or required user/manual Homey speaker testing is still pending;
+  as soon as the PR is reviewable and verification evidence is in place, set it
+  from Draft to Ready for review (for example with `gh pr ready`) without
+  waiting for an explicit user prompt.
 - Immediately after creating a PR, verify the base branch with
   `gh pr view <number> --json baseRefName,headRefName`. If `baseRefName` is not
   `main`, stop and fix the PR base before continuing.
