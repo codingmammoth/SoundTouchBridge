@@ -191,6 +191,11 @@ Use the normal ticket/branch/PR workflow for release preparation too. Code,
 asset, documentation, and publishing fixes should be traceable to a GitHub
 issue and reviewed through a pull request before the final publish.
 
+When a PR is opened, request `@codex review` on the PR and wait for the
+automated review to finish. Address relevant notes with normal follow-up commits
+and request `@codex review` again after each follow-up push unless automatic
+reviews are enabled.
+
 Before publishing:
 
 1. Start from a clean, up-to-date `main`.

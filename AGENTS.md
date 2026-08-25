@@ -179,3 +179,10 @@ npm run test:stream-protocol -- --host <speaker-ip> --yes
 
 The app should remain clearly unofficial and not affiliated with Bose. Prefer
 compatibility wording such as "for Bose SoundTouch" where needed.
+## Codex PR Review Loop
+
+When Codex prepares a pull request, ask for an automated review by commenting `@codex review` on the PR after the branch is pushed. Codex normally reacts with `:eyes:` while reviewing and `:+1:` when it is happy; otherwise it leaves review notes.
+
+Wait a reasonable amount of time for the review to start and finish. If the review does not start within an acceptable time, stop waiting and add a PR comment that the automated review was requested but did not start.
+
+Address relevant review notes in the same PR with normal follow-up commits. Do not force-push, rewrite, or overwrite branch history. If a note is less relevant or belongs to a different topic than the original ticket, file a follow-up issue instead and mention that decision in the PR. After each new push, request `@codex review` again unless automatic review is enabled, wait again for the reviewer response, and repeat this loop until the reviewer is happy or the wait is explicitly abandoned.
