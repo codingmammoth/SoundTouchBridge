@@ -155,4 +155,5 @@ not show the same speaker artwork twice.
 Changes are handled through focused GitHub issues and pull requests. When a PR
 is opened, request `@codex review`, wait for the automated review, address
 relevant notes with normal follow-up commits, and request review again after
-each follow-up push unless automatic reviews are enabled.
+each follow-up push unless automatic reviews are enabled. The detailed result
+reading procedure lives in `docs/agent-pr-review-loop.md`.
