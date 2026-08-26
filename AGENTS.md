@@ -184,11 +184,11 @@ compatibility wording such as "for Bose SoundTouch" where needed.
 
 This loop applies to any coding agent working in this repository. **The authoring agent** is whichever agent prepared the branch; **the reviewer** is the Codex review bot invoked by an `@codex review` comment. They are frequently different tools.
 
-After pushing the branch and opening the pull request against the intended base branch for the work (normally the repository default branch; use an approved stacked or deployment branch when repo instructions require it), request `@codex review` unless automatic Codex review is enabled and has already started for the current head.
+After pushing the branch and opening the pull request against the intended base branch for the work (normally the repository default branch; use an approved stacked or deployment branch when repo instructions require it), request `@codex review` unless automatic Codex review has already started for the current head.
 
 - Read `docs/agent-pr-review-loop.md` before your first review request on a PR. It documents the result shapes, GitHub surfaces, correlation and pagination steps needed to read reviewer output correctly.
 - Verify each finding against the source before acting on it. If a finding does not hold, answer it with the evidence rather than implementing it.
 - Address relevant findings in the same PR with normal follow-up commits. Do not force-push, rewrite, or overwrite branch history.
 - If a finding is less relevant or belongs to a different topic than the originating ticket, file a follow-up issue instead and mention that decision in the PR.
-- After each new push, or after resolving findings without code changes, request `@codex review` again unless automatic review is enabled. Repeat until a round completes with no findings on either surface, or until an incomplete/abandoned review attempt is explicitly recorded.
+- After each new push, request `@codex review` again unless automatic Codex review starts for that push. After resolving findings without code changes, request `@codex review` again on the unchanged head. Repeat until a round completes with no findings on either surface, or until an incomplete/abandoned review attempt is explicitly recorded.
 - Never infer approval from silence, and never treat a `Didn't find any major issues` summary as proof a round was clean. A clean round is one signal, not proof; the authoring agent stays responsible for checking its own work.

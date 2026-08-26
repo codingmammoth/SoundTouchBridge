@@ -13,7 +13,7 @@ Two roles appear throughout and are frequently different tools:
 
 Push the branch, open the pull request against the intended base branch for the work (normally the repository default branch; use an approved stacked or deployment branch when repo instructions require it), then request review.
 
-If automatic Codex review is enabled and starts for the current head, do not add a redundant `@codex review` comment. Use the push time, PR-ready time, or other automatic-run marker as the request boundary for correlation. If automatic review is not enabled, or no automatic run starts within a reasonable time, comment `@codex review` on the PR.
+If automatic Codex review starts for the current head, do not add a redundant `@codex review` comment. Use the push time, PR-ready time, or other automatic-run marker as the request boundary for correlation. If no automatic run starts within a reasonable time, comment `@codex review` on the PR.
 
 The reviewer adds an `:eyes:` reaction to the triggering comment while it works and removes it when finished. An absent `:eyes:` therefore means either "not started" or "already done"; on its own it is not a progress signal.
 
@@ -56,12 +56,12 @@ Top-level issue comments can arrive late. Do not attach every bot-authored issue
 
 Note the current head SHA and the request boundary before requesting or relying on review. For manual reviews, the request boundary is the `@codex review` comment time. For automatic reviews, use the push time, PR-ready time, or other automatic-run marker.
 
-1. Fetch all PR reviews with pagination. Keep reviews whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. Take the newest matching review. There may be none: a summary-only round creates no PR review.
-2. If a matching review exists, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
+1. Fetch all PR reviews with pagination. Keep every review whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. There may be none: a summary-only round creates no PR review. Do not start another manual review while a previous request is still active unless you are explicitly abandoning that attempt.
+2. For every matching review, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
 3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request boundary, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries. Summaries must name the current head. Findings must be correlated to the current head or reconciled manually before they are used to judge the latest round.
 4. If a manual `@codex review` request was used and you can observe the triggering comment reactions, wait for the `:eyes:` reaction to be removed before the final result read. If `:eyes:` remains beyond a reasonable wait, record an incomplete/abandoned review attempt. If no reaction is observable, such as with an automatic run or limited API visibility, wait for a matching review or summary and then perform a final paginated read of both result surfaces after a short stabilization window. Treat remaining ambiguity as incomplete rather than clean.
 
-The round has completed when the reviewer has produced a completion signal: preferably the observed `:eyes:` reaction was removed, or, when reactions are not observable, a matching review exists or a summary names the current head and both result surfaces have had a short stabilization window. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
+The round has completed only after the reviewer has produced a completion signal and the final paginated result read has found matching output. Prefer the observed `:eyes:` reaction being removed as the cue to perform that final read. When reactions are not observable, use a matching review or a summary naming the current head plus a short stabilization window before the final read. If the cue appears but no matching review, summary, or finding can be correlated to the current head, treat the attempt as incomplete. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
 
 ## Reconciling The Commit
 
@@ -85,6 +85,6 @@ Address relevant findings in the same PR with normal follow-up commits. Do not f
 
 If a finding is less relevant, or belongs to a different topic than the originating ticket, file a follow-up issue instead and mention that decision in the PR.
 
-After each new push, request `@codex review` again unless automatic review is enabled, wait for the result, and repeat until a round completes with no findings on either surface. If all findings are resolved without code changes (for example answered with evidence or moved to follow-up issues), request another review on the unchanged head unless automatic review is enabled; otherwise record why the finding disposition is terminal.
+After each new push, request `@codex review` again unless automatic Codex review starts for that push, wait for the result, and repeat until a round completes with no findings on either surface. If all findings are resolved without code changes (for example answered with evidence or moved to follow-up issues), request another review on the unchanged head; otherwise record why the finding disposition is terminal.
 
 A clean round is one signal, not proof. The authoring agent stays responsible for checking its own work.
