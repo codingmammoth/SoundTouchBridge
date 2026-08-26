@@ -11,7 +11,9 @@ Two roles appear throughout and are frequently different tools:
 
 ## Requesting A Review
 
-Push the branch, open the pull request against the repository default branch, then comment `@codex review` on the PR.
+Push the branch, open the pull request against the intended base branch for the work (normally the repository default branch; use an approved stacked or deployment branch when repo instructions require it), then request review.
+
+If automatic Codex review is enabled and starts for the current head, do not add a redundant `@codex review` comment. Use the push time, PR-ready time, or other automatic-run marker as the request boundary for correlation. If automatic review is not enabled, or no automatic run starts within a reasonable time, comment `@codex review` on the PR.
 
 The reviewer adds an `:eyes:` reaction to the triggering comment while it works and removes it when finished. An absent `:eyes:` therefore means either "not started" or "already done"; on its own it is not a progress signal.
 
@@ -42,21 +44,21 @@ Three endpoints matter, and every one of them must be paginated. The API returns
 
 | Endpoint | Carries | Correlate by |
 |---|---|---|
-| `pulls/<n>/reviews` | Review entries | `user.login`, current head SHA, newest `submitted_at` after your request |
+| `pulls/<n>/reviews` | Review entries | `user.login`, current head SHA, newest `submitted_at` after your request boundary |
 | `pulls/<n>/comments` | Inline findings | `pull_request_review_id` |
 | `issues/<n>/comments` | Findings and summaries | `user.login`, `created_at`, and commit evidence in the body |
 
 `pulls/<n>/comments` accumulates inline comments from every review on the PR. Its contents say nothing about what the latest review found until comments are correlated to the latest review round.
 
-Top-level issue comments can arrive late. Do not attach every bot-authored issue comment created after your latest request to the current round by timestamp alone. Correlate summaries by their `Reviewed commit` SHA. Correlate finding comments by commit evidence in their links/body when present, or by a clearly bounded request window; if the body cannot be tied to the current head, treat the result as ambiguous and inspect manually before declaring the round clean.
+Top-level issue comments can arrive late. Do not attach every bot-authored issue comment created after your latest request boundary to the current round by timestamp alone. Correlate summaries by their `Reviewed commit` SHA. Correlate finding comments by commit evidence in their links/body when present, or by a clearly bounded request window; if the body cannot be tied to the current head, treat the result as ambiguous and inspect manually before declaring the round clean.
 
 ## Procedure
 
-Note the current head SHA and the request time before requesting review.
+Note the current head SHA and the request boundary before requesting or relying on review. For manual reviews, the request boundary is the `@codex review` comment time. For automatic reviews, use the push time, PR-ready time, or other automatic-run marker.
 
-1. Fetch all PR reviews with pagination. Keep reviews whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request. Take the newest matching review. There may be none: a summary-only round creates no PR review.
+1. Fetch all PR reviews with pagination. Keep reviews whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. Take the newest matching review. There may be none: a summary-only round creates no PR review.
 2. If a matching review exists, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
-3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries. Summaries must name the current head. Findings must be correlated to the current head or reconciled manually before they are used to judge the latest round.
+3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request boundary, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries. Summaries must name the current head. Findings must be correlated to the current head or reconciled manually before they are used to judge the latest round.
 4. After observing any matching review or summary, continue polling both result surfaces for a short stabilization window before declaring the round clean. A review can appear before a top-level finding comment from the same run.
 
 The round has completed when either a matching review exists or a summary names the current head, and the result surfaces have had a short stabilization window. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
@@ -71,7 +73,7 @@ For top-level finding comments, look for commit evidence in the linked file URLs
 
 Wait a reasonable amount of time for the review to start and finish. Do not wait indefinitely.
 
-If the review does not start, or starts and produces no result after a reasonable wait, stop waiting and add a PR comment recording that automated review was requested and did not complete.
+If the review does not start, or starts and produces no result after a reasonable wait, stop waiting and add a PR comment recording that automated review was requested and did not complete. This is an explicit incomplete/abandoned review outcome for the current attempt, not a clean review. Resume by requesting review again later, or proceed only if the user or maintainer explicitly accepts that the automated review is unavailable.
 
 Never infer approval from silence. If a watcher reports nothing, run the procedure above by hand before drawing a conclusion.
 
@@ -83,6 +85,6 @@ Address relevant findings in the same PR with normal follow-up commits. Do not f
 
 If a finding is less relevant, or belongs to a different topic than the originating ticket, file a follow-up issue instead and mention that decision in the PR.
 
-After each new push, request `@codex review` again unless automatic review is enabled, wait for the result, and repeat until a round completes with no findings on either surface.
+After each new push, request `@codex review` again unless automatic review is enabled, wait for the result, and repeat until a round completes with no findings on either surface. If all findings are resolved without code changes (for example answered with evidence or moved to follow-up issues), request another review on the unchanged head unless automatic review is enabled; otherwise record why the finding disposition is terminal.
 
 A clean round is one signal, not proof. The authoring agent stays responsible for checking its own work.
