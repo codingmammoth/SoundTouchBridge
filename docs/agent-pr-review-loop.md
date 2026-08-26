@@ -44,23 +44,28 @@ Three endpoints matter, and every one of them must be paginated. The API returns
 |---|---|---|
 | `pulls/<n>/reviews` | Review entries | `user.login`, current head SHA, newest `submitted_at` after your request |
 | `pulls/<n>/comments` | Inline findings | `pull_request_review_id` |
-| `issues/<n>/comments` | Findings and summaries | `user.login`, `created_at`, and `Reviewed commit` SHA |
+| `issues/<n>/comments` | Findings and summaries | `user.login`, `created_at`, and commit evidence in the body |
 
 `pulls/<n>/comments` accumulates inline comments from every review on the PR. Its contents say nothing about what the latest review found until comments are correlated to the latest review round.
 
+Top-level issue comments can arrive late. Do not attach every bot-authored issue comment created after your latest request to the current round by timestamp alone. Correlate summaries by their `Reviewed commit` SHA. Correlate finding comments by commit evidence in their links/body when present, or by a clearly bounded request window; if the body cannot be tied to the current head, treat the result as ambiguous and inspect manually before declaring the round clean.
+
 ## Procedure
 
-Note the current head SHA before requesting review.
+Note the current head SHA and the request time before requesting review.
 
 1. Fetch all PR reviews with pagination. Keep reviews whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request. Take the newest matching review. There may be none: a summary-only round creates no PR review.
 2. If a matching review exists, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
-3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries.
+3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries. Summaries must name the current head. Findings must be correlated to the current head or reconciled manually before they are used to judge the latest round.
+4. After observing any matching review or summary, continue polling both result surfaces for a short stabilization window before declaring the round clean. A review can appear before a top-level finding comment from the same run.
 
-The round has completed when either a matching review exists or a summary names the current head. The round is clean only when it has completed, has no correlated inline findings, and has no top-level `### Review Finding` comment. Keep completion and cleanliness separate.
+The round has completed when either a matching review exists or a summary names the current head, and the result surfaces have had a short stabilization window. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
 
 ## Reconciling The Commit
 
 Reviews and summary comments name the commit reviewed. Confirm that SHA matches the current head before treating a result as covering your latest push. A review of an earlier commit says nothing about work pushed after it.
+
+For top-level finding comments, look for commit evidence in the linked file URLs or nearby bot output. If a finding cannot be reconciled to the current head, do not ignore it and do not automatically attribute it to the current round; inspect the timeline and answer with the correlation decision.
 
 ## Waiting
 
