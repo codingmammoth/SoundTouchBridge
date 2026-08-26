@@ -11,6 +11,7 @@ events, syncs native preset labels for display, and starts playback through the
 speaker's UPnP AVTransport endpoint.
 
 ## Documentation Hygiene
+- `docs/agent-pr-review-loop.md` is the operational reference for the automated PR review loop. Keep it current when observed reviewer behavior changes.
 
 - Keep `README.md`, `Overview.md`, and `AGENTS.md` up to date whenever behavior,
   architecture, user workflow, publishing workflow, or development process
@@ -179,10 +180,15 @@ npm run test:stream-protocol -- --host <speaker-ip> --yes
 
 The app should remain clearly unofficial and not affiliated with Bose. Prefer
 compatibility wording such as "for Bose SoundTouch" where needed.
-## Codex PR Review Loop
+## Agent PR Review Loop
 
-When Codex prepares a pull request, ask for an automated review by commenting `@codex review` on the PR after the branch is pushed. Codex normally reacts with `:eyes:` while reviewing and `:+1:` when it is happy; otherwise it leaves review notes.
+This loop applies to any coding agent working in this repository. **The authoring agent** is whichever agent prepared the branch; **the reviewer** is the Codex review bot invoked by an `@codex review` comment. They are frequently different tools.
 
-Wait a reasonable amount of time for the review to start and finish. If the review does not start within an acceptable time, stop waiting and add a PR comment that the automated review was requested but did not start.
+After pushing the branch and opening the pull request against the repository default branch, comment `@codex review` on the PR.
 
-Address relevant review notes in the same PR with normal follow-up commits. Do not force-push, rewrite, or overwrite branch history. If a note is less relevant or belongs to a different topic than the original ticket, file a follow-up issue instead and mention that decision in the PR. After each new push, request `@codex review` again unless automatic review is enabled, wait again for the reviewer response, and repeat this loop until the reviewer is happy or the wait is explicitly abandoned.
+- Read `docs/agent-pr-review-loop.md` before your first review request on a PR. It documents the result shapes, GitHub surfaces, correlation and pagination steps needed to read reviewer output correctly.
+- Verify each finding against the source before acting on it. If a finding does not hold, answer it with the evidence rather than implementing it.
+- Address relevant findings in the same PR with normal follow-up commits. Do not force-push, rewrite, or overwrite branch history.
+- If a finding is less relevant or belongs to a different topic than the originating ticket, file a follow-up issue instead and mention that decision in the PR.
+- After each new push, request `@codex review` again unless automatic review is enabled, and repeat until a round completes with no findings on either surface.
+- Never infer approval from silence, and never treat a `Didn't find any major issues` summary as proof a round was clean. A clean round is one signal, not proof; the authoring agent stays responsible for checking its own work.

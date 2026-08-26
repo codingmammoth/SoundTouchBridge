@@ -194,7 +194,8 @@ issue and reviewed through a pull request before the final publish.
 When a PR is opened, request `@codex review` on the PR and wait for the
 automated review to finish. Address relevant notes with normal follow-up commits
 and request `@codex review` again after each follow-up push unless automatic
-reviews are enabled.
+reviews are enabled. See `docs/agent-pr-review-loop.md` for the full reviewer
+result-reading procedure.
 
 Before publishing:
 
