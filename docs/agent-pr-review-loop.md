@@ -28,6 +28,11 @@ Neither posting a trigger nor its author's identity proves review completion.
    correlated inline/top-level findings, a current-head review, or a running
    or completed current-head summary (including summary-only rounds) all
    acknowledge review. Process those results instead of sending a duplicate.
+   Every acknowledgement must match the recorded head and occur after the
+   current request boundary: use review submission time, finding creation
+   time, reaction creation time, or the matched summary row's own run time.
+   For an edited summary, do not use the comment's original creation time or
+   another row's update. Prior same-head results are not a new acknowledgement.
    If truly unacknowledged, re-read the head and both surfaces before one
    identical, explicitly authorized and actor-verified human trigger. Abort
    the comparison if the full SHA changed; restart review planning for the new
@@ -65,6 +70,13 @@ Reaction counts or emoji in boilerplate are not reviewer approval.
   reaction's `created_at`, not aggregate counts, and require it to be at or
   after the recorded boundary of the current round. A pre-existing reaction
   cannot cover a new head or a later same-head round.
+- PR-body reactions carry no head/review ID. Accept one only after proving
+  that all earlier rounds had terminated before this round's boundary and no
+  other manual/automatic round overlapped it. Record that timeline evidence.
+  Timestamp alone is insufficient: a late old-head reaction can arrive after
+  a new boundary. If overlap cannot be excluded, require a fresh reaction on
+  an immutable reviewer result comment explicitly naming this head/round, or
+  keep approval incomplete for maintainer verification.
 - Re-read the head after collecting results. Require matching completed review
   or summary evidence and no findings on either surface after stabilization.
   In a review-summary table, correlate each code/security row to its own SHA;
