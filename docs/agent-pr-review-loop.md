@@ -4,6 +4,14 @@ Operational reference for the automated pull-request review loop. `AGENTS.md` ho
 
 Read this before requesting your first review on a pull request.
 
+Use the author identity selected by the Agent GitHub Identity section in
+`AGENTS.md` for review requests, replies, and paginated API reads. A configured
+app may author the PR and comments; it does not become the reviewer. Keep
+`chatgpt-codex-connector[bot]` as the review-result identity, and resolve human
+recipients separately from the authenticated actor. An app-authored review
+request is not evidence that review started or completed: verify both result
+surfaces and the exact head using the procedure below.
+
 Two roles appear throughout and are frequently different tools:
 
 - **The authoring agent** - whichever agent prepared the branch and opened the PR. Any coding agent working in this repository.
