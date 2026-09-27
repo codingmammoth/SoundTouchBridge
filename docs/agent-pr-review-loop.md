@@ -46,6 +46,12 @@ Neither posting a trigger nor its author's identity proves review completion.
    request, verify current task/user authorization or independently trusted
    standing local configuration; a past one-off test never grants authority.
    Use the verified route directly only while that authorization still applies.
+   In an experiment, record each trigger's own timestamp and URL. Attribute
+   acknowledgement to a route only with trigger-specific evidence (for example,
+   reviewer eyes on that exact comment), or an explicit rejection excluding the
+   earlier route. Head/type/time alone cannot rule out delayed App delivery;
+   without causal evidence label the identity comparison inconclusive, even
+   when the completed review itself independently satisfies the handoff gate.
 4. Never automatically retry a trigger write. Reconcile uncertain outcomes
    with the normal selected author identity (App when configured, otherwise
    the environment's authorized account). Missing auth remains blocked; do
@@ -180,7 +186,7 @@ are activity only, never a type-specific completion signal.
 
 Note the current head SHA and the request boundary before requesting or relying on review. For manual reviews, the request boundary is the `@codex review` comment time. For automatic reviews, use the push time, PR-ready time, or other automatic-run marker.
 
-1. Fetch all PR reviews with pagination. Keep every review whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. There may be none: a summary-only round creates no PR review. Do not start another manual review until terminal evidence confirms every earlier run has stopped. Local abandonment or timeout does not stop a server-side run.
+1. Fetch all PR reviews with pagination. Keep every review whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. There may be none: a summary-only round creates no PR review. An acknowledged earlier run must have terminal evidence that it stopped before another request; local abandonment or timeout does not stop it. A trial with no acknowledgement follows only the explicitly authorized five-minute experiment and immediate preflight above, preserving its causal uncertainty.
 2. For every matching review, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
 3. Fetch all issue comments with pagination and retain all reviewer-authored bodies before classification. For one-off `### Review Finding` and `Codex Review:` comments, require current-head evidence and a creation time after the request boundary. For persistent summary tables, do not filter by comment creation time: apply the per-row type, head, run-time and completed-status rules above. Manually reconcile ambiguous findings; never treat a running table row as a completed result.
 4. Wait for matching completion output for the requested type/head/round. Trigger-comment eyes or shared PR-body eyes can inform activity, but neither their presence nor removal proves that type completed. A different type may still be running: account for it separately and do not declare the whole PR ready until every required type is terminal and clean. Re-read both paginated result surfaces after a short stabilization window. Missing output or ambiguous type remains incomplete.
