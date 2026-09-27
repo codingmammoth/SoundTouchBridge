@@ -132,6 +132,23 @@ A `Didn't find any major issues` summary does not prove the round was clean. It 
 
 ## Correlating A Result With Its Round
 
+### Persistent Summary Tables
+
+The issue-comment endpoint also returns edited comments marked
+`<!-- codex-pull-request-review-summary -->` with a `Codex Review Summary`
+table. Retain each current body even if created before this round, using the
+same paginated `issues/<n>/comments` read.
+For each row, extract Review type (Code Review or Security Review), Status,
+Commit SHA, trigger, and its own `<relative-time datetime="...">` run timestamp.
+Verify that an abbreviated SHA uniquely matches the recorded full head.
+Match the requested type and require the row's run time after the request
+boundary. Do not substitute another row's time, comment creation time, or
+global `updated_at`. Unknown or missing fields are incomplete evidence.
+Running acknowledges work, not completion; only a matching Completed row
+can signal completion. Re-read after stabilization, inspect both finding
+surfaces, and apply the separate fresh thumbs-up gate. A table describes
+activity, not cleanliness. Account for every required review type.
+
 Three endpoints matter, and every one of them must be paginated. The API returns 30 items per page by default.
 
 | Endpoint | Carries | Correlate by |
@@ -150,7 +167,7 @@ Note the current head SHA and the request boundary before requesting or relying 
 
 1. Fetch all PR reviews with pagination. Keep every review whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. There may be none: a summary-only round creates no PR review. Do not start another manual review while a previous request is still active unless you are explicitly abandoning that attempt.
 2. For every matching review, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
-3. Fetch all issue comments with pagination. Keep bot-authored comments created after your request boundary, then classify bodies starting `### Review Finding` as findings and bodies starting `Codex Review:` as summaries. Summaries must name the current head. Findings must be correlated to the current head or reconciled manually before they are used to judge the latest round.
+3. Fetch all issue comments with pagination and retain all reviewer-authored bodies before classification. For one-off `### Review Finding` and `Codex Review:` comments, require current-head evidence and a creation time after the request boundary. For persistent summary tables, do not filter by comment creation time: apply the per-row type, head, run-time and completed-status rules above. Manually reconcile ambiguous findings; never treat a running table row as a completed result.
 4. If a manual `@codex review` request was used and you can observe the triggering comment reactions, wait for the `:eyes:` reaction to be removed before the final result read. If `:eyes:` remains beyond a reasonable wait, record an incomplete/abandoned review attempt. If no reaction is observable, such as with an automatic run or limited API visibility, wait for a matching review or summary and then perform a final paginated read of both result surfaces after a short stabilization window. Treat remaining ambiguity as incomplete rather than clean.
 
 The round has completed only after the reviewer has produced a completion signal and the final paginated result read has found matching output. Prefer the observed `:eyes:` reaction being removed as the cue to perform that final read. When reactions are not observable, use a matching review or a summary naming the current head plus a short stabilization window before the final read. If the cue appears but no matching review, summary, or finding can be correlated to the current head, treat the attempt as incomplete. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
