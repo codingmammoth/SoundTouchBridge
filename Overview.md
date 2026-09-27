@@ -152,6 +152,11 @@ not show the same speaker artwork twice.
 
 ## Development Workflow
 
+`AGENTS.md` defines the selected author identity and narrow authorized
+linked-human review-trigger exception, including no-App portability. A fresh
+clean current-head review and reviewer thumbs-up are required independently
+of checks and formal approval; absent signals are not approval.
+
 Changes are handled through focused GitHub issues and pull requests. When a PR
 is opened, request `@codex review`, wait for the automated review, address
 relevant notes with normal follow-up commits, and request review again after

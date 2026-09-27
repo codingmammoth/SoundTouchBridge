@@ -5,12 +5,42 @@ Operational reference for the automated pull-request review loop. `AGENTS.md` ho
 Read this before requesting your first review on a pull request.
 
 Use the author identity selected by the Agent GitHub Identity section in
-`AGENTS.md` for review requests, replies, and paginated API reads. A configured
-app may author the PR and comments; it does not become the reviewer. Keep
-`chatgpt-codex-connector[bot]` as the review-result identity, and resolve human
-recipients separately from the authenticated actor. An app-authored review
-request is not evidence that review started or completed: verify both result
-surfaces and the exact head using the procedure below.
+`AGENTS.md` for ordinary comments, replies, and paginated API reads. Only the
+literal `@codex review` trigger may use the explicitly authorized, separately
+verified linked-human identity described there. Keep
+`chatgpt-codex-connector[bot]` as the independent review-result identity.
+Neither a posted trigger nor its author's identity proves review completion.
+
+## Review Trigger Identity And Readiness
+
+1. Record the current head and inspect paginated comments, reviews, inline
+   findings, and reactions. Do not duplicate an active review or a clean
+   current-head round with the required thumbs-up. If a clean completed round
+   still lacks that signal after stabilization, record incomplete approval and
+   ask the maintainer to verify or re-request it explicitly; never silently
+   accept the result or repeatedly ping.
+2. Use the explicitly configured trigger route. In a user-requested App versus
+   human experiment, send the literal `@codex review` as the App first and
+   observe for five minutes. Eyes from the reviewer, a matching running summary,
+   or a completed matching review are acknowledgement; absence of eyes alone
+   is not proof that nothing ran.
+3. If still unacknowledged, re-read the head and both result surfaces before one
+   identical human-authored trigger, and only with explicit authorization and
+   the expected linked-human login verified. Once that route has been verified
+   and configured, use it directly for later triggers rather than repeating
+   the failed App experiment on every PR.
+4. Never automatically retry a trigger write. Reconcile an uncertain result by
+   reading comments with the normal selected author identity (App when
+   configured, otherwise the environment's authorized account). A missing or unauthorized
+   trigger route means blocked awaiting review, not permission to use another
+   account or operation.
+5. Wait for the independent reviewer to finish for the exact current head.
+   Inspect both result surfaces with pagination after a stabilization read and
+   require a fresh completed round with no findings on either surface and the
+   reviewer's thumbs-up before declaring review-ready. Address or disposition
+   earlier findings, then obtain that clean round; deferral alone is not approval. A prior-head reaction cannot cover new commits.
+   Running, failed, incomplete, or ambiguous results remain blocked. Do not
+   mistake a clean automated review for required CI or formal GitHub approval.
 
 Two roles appear throughout and are frequently different tools:
 

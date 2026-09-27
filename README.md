@@ -191,6 +191,12 @@ Use the normal ticket/branch/PR workflow for release preparation too. Code,
 asset, documentation, and publishing fixes should be traceable to a GitHub
 issue and reviewed through a pull request before the final publish.
 
+For trigger identity, follow the narrowly authorized linked-human exception in
+`AGENTS.md`. Other operations keep the configured identity, and contributors
+without a configured App use their existing authorized account. Require a fresh
+clean current-head review and reviewer thumbs-up separately from checks and
+formal approval; missing approval stays blocked as described in the review loop.
+
 When a PR is opened, request `@codex review` on the PR and wait for the
 automated review to finish. Address relevant notes with normal follow-up commits
 and request `@codex review` again after each follow-up push unless automatic
