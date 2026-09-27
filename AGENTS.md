@@ -1,5 +1,34 @@
 # SoundTouch Bridge Agent Notes
 
+## Agent GitHub Identity
+
+- Resolve the target host/owner/repository and intended actor from trusted task
+  or local environment instructions before authenticated GitHub work.
+- If an app is explicitly configured for that repository, use its trusted helper
+  for authenticated reads, authorized API writes, and Git clone/fetch/push.
+  Verify the expected app actor before writes. Public repositories follow the
+  same rule when included in the configured scope.
+- If no app is configured for that repository, use the environment's existing
+  authorized GitHub/Git account and verify the actor before writes. Contributors
+  on other computers do not need to install a particular app or helper.
+- A configured helper that is missing, broken, expired, or lacks permission is
+  a blocker, not an absent configuration. Never silently fall back to personal
+  credentials, broaden permissions, or change global gh/Git authentication.
+- The gh and Git network examples in this repository describe operations, not
+  credential selection. In app mode, route them through the helper's documented
+  interface (a local setup may identify it with `CM_GH_APP_HELPER`); do not use
+  plain authenticated pull/push, implicit PR pushes, or SSH as a bypass. An
+  app-authenticated fetch followed by local `git merge --ff-only FETCH_HEAD`
+  can update a clean base branch.
+- Keep keys/tokens out of output, repository files, saved remotes, and build/test
+  processes. Reconcile uncertain writes by readback rather than blind retries.
+  For new app-authored commits, use the verified bot's name and matching noreply
+  email through per-command or checkout-local settings; never rewrite authorship.
+- Author identity is separate from the review bot and human recipient. Keep the
+  existing reviewer, issue-first workflow, checks, branch protections, and user
+  approval boundaries. This policy grants no new mutation or merge authority and
+  does not migrate independent CI/deployment credentials or human workflows.
+
 ## Project Summary
 
 SoundTouch Bridge is a local-only Homey Pro app for Bose SoundTouch speakers. It lets
