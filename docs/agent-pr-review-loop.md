@@ -37,8 +37,10 @@ Neither posting a trigger nor its author's identity proves review completion.
    eyes alone cannot acknowledge Code Review. Track other required review
    types separately; wait for them to terminate before starting a missing
    Code Review to avoid overlapping rounds.
-   If truly unacknowledged, re-read the head and both surfaces before one
+   If truly unacknowledged, immediately re-read the head, both result
+   surfaces, PR-body reactions and trigger-comment reactions before one
    identical, explicitly authorized and actor-verified human trigger. Abort
+   if any review has become active or the required round has completed. Abort
    the comparison if the full SHA changed; restart review planning for the new
    head rather than triggering it under the old experiment. For every later
    request, verify current task/user authorization or independently trusted
@@ -79,13 +81,18 @@ Reaction counts or emoji in boilerplate are not reviewer approval.
   pilot rollout, but verify freshness each time. If an integration keeps an
   old `+1`, require a fresh reviewer approval on a current-head result comment
   through the maintainer verification path; the old reaction is not enough.
-- PR-body reactions carry no head/review ID. Accept one only after proving
-  that all earlier rounds had terminated before this round's boundary and no
-  other manual/automatic round overlapped it. Record that timeline evidence.
-  Timestamp alone is insufficient: a late old-head reaction can arrive after
-  a new boundary. If overlap cannot be excluded, require a fresh reaction on
-  an immutable reviewer result comment explicitly naming this head/round, or
-  keep approval incomplete for maintainer verification.
+- PR-body reactions carry no head/review ID. A timestamp and non-overlapping
+  execution are not enough: delayed output from an earlier terminated run
+  can still arrive in this round. Require recorded timeline evidence that
+  associates the reaction with this completed head/type/round and excludes
+  earlier delayed output. Otherwise keep approval incomplete for maintainer
+  verification or use a fresh reaction on a result comment tied to this round.
+- Result comments are editable, not immutable. For a comment-level approval,
+  record its body (or hash), head/type/round and updated_at before the reaction;
+  require the reaction to follow that revision and verify the same revision
+  still exists at the final read. A reaction retained across an edit does not
+  approve the new body. If revision association cannot be proved, keep approval
+  incomplete; never infer it from the latest body and reaction time alone.
 - Re-read the head after collecting results. Require matching completed review
   or summary evidence and no findings on either surface after stabilization.
   In a review-summary table, correlate each code/security row to its own SHA;
@@ -163,14 +170,22 @@ Top-level issue comments can arrive late. Do not attach every bot-authored issue
 
 ## Procedure
 
+Carry the requested review type through every step below, not only the
+trigger preflight. A matching author, head and time does not by itself prove
+Code Review rather than Security Review. Correlate the review/one-off result
+with explicit type or unambiguous run evidence and its matching summary row
+when present; ambiguous type remains incomplete. Inspect findings from all
+required types and keep their completion states separate. Shared PR-body eyes
+are activity only, never a type-specific completion signal.
+
 Note the current head SHA and the request boundary before requesting or relying on review. For manual reviews, the request boundary is the `@codex review` comment time. For automatic reviews, use the push time, PR-ready time, or other automatic-run marker.
 
 1. Fetch all PR reviews with pagination. Keep every review whose author is `chatgpt-codex-connector[bot]`, whose commit matches the current head, and whose submission time falls after your request boundary. There may be none: a summary-only round creates no PR review. Do not start another manual review while a previous request is still active unless you are explicitly abandoning that attempt.
 2. For every matching review, fetch all PR comments with pagination and keep comments whose `pull_request_review_id` equals that review's `id`. Those are the inline findings for this round.
 3. Fetch all issue comments with pagination and retain all reviewer-authored bodies before classification. For one-off `### Review Finding` and `Codex Review:` comments, require current-head evidence and a creation time after the request boundary. For persistent summary tables, do not filter by comment creation time: apply the per-row type, head, run-time and completed-status rules above. Manually reconcile ambiguous findings; never treat a running table row as a completed result.
-4. If a manual `@codex review` request was used and you can observe the triggering comment reactions, wait for the `:eyes:` reaction to be removed before the final result read. If `:eyes:` remains beyond a reasonable wait, record an incomplete/abandoned review attempt. If no reaction is observable, such as with an automatic run or limited API visibility, wait for a matching review or summary and then perform a final paginated read of both result surfaces after a short stabilization window. Treat remaining ambiguity as incomplete rather than clean.
+4. Wait for matching completion output for the requested type/head/round. Trigger-comment eyes or shared PR-body eyes can inform activity, but neither their presence nor removal proves that type completed. A different type may still be running: account for it separately and do not declare the whole PR ready until every required type is terminal and clean. Re-read both paginated result surfaces after a short stabilization window. Missing output or ambiguous type remains incomplete.
 
-The round has completed only after the reviewer has produced a completion signal and the final paginated result read has found matching output. Prefer the observed `:eyes:` reaction being removed as the cue to perform that final read. When reactions are not observable, use a matching review or a summary naming the current head plus a short stabilization window before the final read. If the cue appears but no matching review, summary, or finding can be correlated to the current head, treat the attempt as incomplete. The round is clean only when it has completed, has no correlated inline findings, and has no correlated top-level `### Review Finding` comment. Keep completion and cleanliness separate.
+The round has completed only when the final paginated read contains a completed result correlated to the requested type, exact current head and request boundary. Do not substitute another type's review or infer completion from eyes disappearing. A completed round is clean only after all its inline and top-level findings have been inspected and none remain actionable; reconcile ambiguous findings rather than dropping them. Keep completion, cleanliness, fresh reviewer thumbs-up, required checks and formal GitHub approval separate.
 
 ## Reconciling The Commit
 
