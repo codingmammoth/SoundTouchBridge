@@ -28,26 +28,31 @@
   existing reviewer, issue-first workflow, checks, branch protections, and user
   approval boundaries. This policy grants no new mutation or merge authority and
   does not migrate independent CI/deployment credentials or human workflows.
-- Narrow review-trigger exception: when explicitly authorized by the user or a
-  trusted local configuration, the literal `@codex review` comment may use a
-  separately verified human GitHub account linked to Codex. Use only the
-  configured trigger helper and expected login; never switch global accounts
-  or treat App failure as permission for personal-account fallback.
-- This exception covers only that trigger and its necessary identity check.
-  Commits, pushes, PR creation, ordinary comments, and review-result reads keep
-  their normal configured identity. Without the authorized trigger identity,
-  report blocked awaiting review; do not broaden permissions or skip review.
+- Narrow review-trigger exception: in configured-App mode, an explicitly
+  user-authorized or trusted locally configured trigger helper may use a
+  separately verified Codex-linked human account for the literal `@codex review`
+  and its necessary identity check only. Never switch global accounts or treat
+  App failure as permission for personal-account fallback.
+- Commits, pushes, PR creation, ordinary comments, and review-result reads keep
+  the normal selected identity. Without an App configuration, the existing
+  authorized account may request review after actor verification; no special
+  App or trigger helper is required for those contributors.
+- Check for automatic/current-head review first. Missing manual-trigger
+  authorization blocks only a needed manual request, not an already running
+  or completed automatic review. If a request is needed but unavailable, report
+  blocked and ask the maintainer; never broaden permissions or skip review.
 - After a trigger, verify acknowledgement rather than assuming delivery starts
-  a review. For a requested identity experiment, observe the App request for
+  review. For an explicitly requested identity experiment, observe the App for
   five minutes before one authorized human trigger on the unchanged head.
-  Re-read first; do not duplicate an active review or a clean current-head
-  review with the required thumbs-up. A clean result without that signal is
-  incomplete: ask the maintainer to verify or re-request approval explicitly.
-- Before declaring review-ready, wait for a completed current-head review,
-  require a no-findings round on both paginated surfaces after stabilization,
-  and confirm the reviewer's thumbs-up. A stale thumbs-up, silence, timeout, failed
-  review, or green CI is not approval. Keep required checks and formal GitHub
-  approval requirements separate, and leave merges to the authorized maintainer.
+  Re-read first: reviewer eyes, correlated findings, a running or completed
+  head-matched summary, or a matching review all acknowledge a run.
+- Before declaring the implementation ready for handoff, require a fresh
+  no-findings current-head round on both paginated surfaces and the reviewer's
+  correlated thumbs-up, using `docs/agent-pr-review-loop.md`. This is not the
+  GitHub Draft/Ready state: make reviewable PRs Ready so review can start.
+  Missing or ambiguous approval stays blocked for maintainer verification.
+  Required checks and formal GitHub approval remain separate; no silent
+  timeout waiver, duplicate active request, automatic write retry, or merge.
 
 ## Project Summary
 

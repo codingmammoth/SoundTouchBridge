@@ -5,42 +5,75 @@ Operational reference for the automated pull-request review loop. `AGENTS.md` ho
 Read this before requesting your first review on a pull request.
 
 Use the author identity selected by the Agent GitHub Identity section in
-`AGENTS.md` for ordinary comments, replies, and paginated API reads. Only the
-literal `@codex review` trigger may use the explicitly authorized, separately
-verified linked-human identity described there. Keep
-`chatgpt-codex-connector[bot]` as the independent review-result identity.
-Neither a posted trigger nor its author's identity proves review completion.
+`AGENTS.md` for ordinary operations and review-result reads. In configured-App
+mode, only the literal `@codex review` trigger and its necessary identity check
+may use an explicitly authorized, separately verified linked-human route.
+Without a configured App, the existing authorized account can request review
+after actor verification; a special trigger helper is not required.
+Keep `chatgpt-codex-connector[bot]` as the independent review-result identity.
+Neither posting a trigger nor its author's identity proves review completion.
 
-## Review Trigger Identity And Readiness
+## Review Trigger Identity And Handoff Readiness
 
-1. Record the current head and inspect paginated comments, reviews, inline
-   findings, and reactions. Do not duplicate an active review or a clean
-   current-head round with the required thumbs-up. If a clean completed round
-   still lacks that signal after stabilization, record incomplete approval and
-   ask the maintainer to verify or re-request it explicitly; never silently
-   accept the result or repeatedly ping.
-2. Use the explicitly configured trigger route. In a user-requested App versus
-   human experiment, send the literal `@codex review` as the App first and
-   observe for five minutes. Eyes from the reviewer, a matching running summary,
-   or a completed matching review are acknowledgement; absence of eyes alone
-   is not proof that nothing ran.
-3. If still unacknowledged, re-read the head and both result surfaces before one
-   identical human-authored trigger, and only with explicit authorization and
-   the expected linked-human login verified. Once that route has been verified
-   and configured, use it directly for later triggers rather than repeating
-   the failed App experiment on every PR.
-4. Never automatically retry a trigger write. Reconcile an uncertain result by
-   reading comments with the normal selected author identity (App when
-   configured, otherwise the environment's authorized account). A missing or unauthorized
-   trigger route means blocked awaiting review, not permission to use another
-   account or operation.
-5. Wait for the independent reviewer to finish for the exact current head.
-   Inspect both result surfaces with pagination after a stabilization read and
-   require a fresh completed round with no findings on either surface and the
-   reviewer's thumbs-up before declaring review-ready. Address or disposition
-   earlier findings, then obtain that clean round; deferral alone is not approval. A prior-head reaction cannot cover new commits.
-   Running, failed, incomplete, or ambiguous results remain blocked. Do not
-   mistake a clean automated review for required CI or formal GitHub approval.
+1. Record the full current head and request boundary (manual comment time, or
+   push/Ready time for an automatic run). Inspect paginated comments, reviews,
+   inline findings, and reactions before any trigger. Do not duplicate an
+   active run or a completed clean current-head round with verified thumbs-up.
+2. Make a reviewable PR Ready under the normal SDLC; the handoff gate below
+   must not keep it Draft and prevent review from starting. Automatic reviews
+   need no manual trigger identity. Only a needed manual request is blocked
+   when its authorized identity is unavailable.
+3. Use the configured route. Only for a user-requested identity experiment,
+   send the literal App trigger and observe for five minutes. Reviewer eyes,
+   correlated inline/top-level findings, a current-head review, or a running
+   or completed current-head summary (including summary-only rounds) all
+   acknowledge review. Process those results instead of sending a duplicate.
+   If truly unacknowledged, re-read the head and both surfaces before one
+   identical, explicitly authorized and actor-verified human trigger. Abort
+   the comparison if the full SHA changed; restart review planning for the new
+   head rather than triggering it under the old experiment. For every later
+   request, verify current task/user authorization or independently trusted
+   standing local configuration; a past one-off test never grants authority.
+   Use the verified route directly only while that authorization still applies.
+4. Never automatically retry a trigger write. Reconcile uncertain outcomes
+   with the normal selected author identity (App when configured, otherwise
+   the environment's authorized account). Missing auth remains blocked; do
+   not choose another account or operation to get around the failure.
+5. Wait for a fresh completed current-head round with no findings on either
+   surface, after addressing or dispositioning earlier findings. Deferral alone
+   is not approval. Read both surfaces again after stabilization and verify
+   thumbs-up with the procedure below. No eyes alone is not completion.
+6. If a clean round still lacks correlated thumbs-up, record incomplete
+   approval and ask the maintainer to verify or explicitly re-request it.
+   A bounded helper may refuse same-head retries: hand that request to the
+   maintainer rather than bypassing the helper or repeatedly auto-pinging.
+   Failed, stale, ambiguous, or incomplete review remains blocked. Required
+   checks and formal GitHub approval are separate; the agent does not merge.
+
+### Verifying Reviewer Thumbs-Up
+
+Use the normal selected identity for these reads; paginate every endpoint.
+Reaction counts or emoji in boilerplate are not reviewer approval.
+
+- Read `repos/<owner>/<repo>/issues/<pr>/reactions?per_page=100` with
+  `gh api --paginate`. A PR is also an issue; this is the PR-body reaction
+  surface used by both manual and automatic Codex reviews.
+- If a manual trigger or a correlated reviewer result comment has reactions,
+  also read `repos/<owner>/<repo>/issues/comments/<comment-id>/reactions?per_page=100`
+  with pagination. Automatic runs need no synthetic trigger comment.
+- Keep only `content="+1"` from `chatgpt-codex-connector[bot]`. Inspect each
+  reaction's `created_at`, not aggregate counts, and require it to be at or
+  after the recorded boundary of the current round. A pre-existing reaction
+  cannot cover a new head or a later same-head round.
+- Re-read the head after collecting results. Require matching completed review
+  or summary evidence and no findings on either surface after stabilization.
+  In a review-summary table, correlate each code/security row to its own SHA;
+  no required row may still be running or failed. A reaction-only result lacks
+  immutable head evidence, so record incomplete and ask the maintainer to
+  verify it rather than inferring approval from silence.
+- If the reaction's actor, time, or round cannot be established, keep approval
+  incomplete and use the maintainer path above. Never add approval yourself,
+  delete reactions to manufacture freshness, or weaken branch protection.
 
 Two roles appear throughout and are frequently different tools:
 
@@ -111,7 +144,7 @@ For top-level finding comments, look for commit evidence in the linked file URLs
 
 Wait a reasonable amount of time for the review to start and finish. Do not wait indefinitely.
 
-If the review does not start, or starts and produces no result after a reasonable wait, stop waiting and add a PR comment recording that automated review was requested and did not complete. This is an explicit incomplete/abandoned review outcome for the current attempt, not a clean review. Resume by requesting review again later, or proceed only if the user or maintainer explicitly accepts that the automated review is unavailable.
+If the review does not start, or starts and produces no result after a reasonable wait, stop waiting and add a PR comment recording the incomplete attempt. Keep handoff blocked; timeout or acceptance that the service is unavailable is not approval. Ask the maintainer to restore review availability or explicitly arrange a new request after confirming no review is active. Never bypass the clean current-head review and thumbs-up gate.
 
 Never infer approval from silence. If a watcher reports nothing, run the procedure above by hand before drawing a conclusion.
 
